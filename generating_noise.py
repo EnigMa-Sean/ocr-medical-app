@@ -77,7 +77,7 @@ class GeneratingNoise:
         hh, ww = img.shape[:2]
 
         # read wrinkle image as grayscale and convert to float in range 0 to 1
-        wrinkles = cv2.imread('images/wrinkles.jpg',0).astype("float32") / 255.0
+        wrinkles = cv2.imread('noisy_images/wrinkles.jpg',0).astype("float32") / 255.0
         wrinkles = cv2.resize(wrinkles, (ww,hh), fx=0, fy=0)
         wrinkles = 1.33 * wrinkles -0.33
 
@@ -111,5 +111,12 @@ if __name__ == '__main__':
     light_img = gen_noise.add_fake_light()
     wrinkle_img = gen_noise.wrinkle_image()
     add_shadow_img = gen_noise.add_shadow()
-    plt.imshow(rotate_img) 
-    plt.show() 
+    # plt.imshow(rotate_img) 
+    # plt.show() 
+
+    # cv2.imwrite('noisy_images/blurry_image.jpg', blur_img)
+    # cv2.imwrite('noisy_images/rotated_image.jpg', rotate_img)
+    # cv2.imwrite('noisy_images/noisy_image.jpg', noisy_img)
+    # cv2.imwrite('noisy_images/high_exposure_image.jpg', light_img)
+    # cv2.imwrite('noisy_images/wrinkled_image.jpg', wrinkle_img)
+    # cv2.imwrite('noisy_images/dark_image.jpg', add_shadow_img)
