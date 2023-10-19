@@ -1,0 +1,134 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import imutils
+
+from base_class import BaseClass
+
+class ImageFilter(BaseClass):
+    
+    @staticmethod
+    def measure_quality(original_image, unrotated_image):
+        
+        hist_original = cv2.calcHist([original_image], [0], None, [256], [0, 256])
+        hist_unrotated = cv2.calcHist([unrotated_image], [0], None, [256], [0, 256])
+
+        quality = cv2.compareHist(hist_original, hist_unrotated, cv2.HISTCMP_INTERSECT)
+
+        return quality
+    
+    @staticmethod
+    def unrotate_image(image, angle_degrees):
+
+        rows, cols = image.shape[:2]
+        
+        M = cv2.getRotationMatrix2D((cols / 2, rows / 2), angle_degrees, 1)
+        
+        unrotated_image = cv2.warpAffine(image, M, (cols, rows))
+        
+        return unrotated_image
+
+    @classmethod
+    def blurry_filter(cls):
+
+        sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+        filtered_img = cv2.filter2D(cls.image_for_processing, -1, sharpen_kernel)
+
+        return filtered_img
+    
+    @classmethod
+    def shadow_filter(cls):
+
+        rgb_planes = cv2.split(cls.image_for_processing)
+        result_norm_planes = []
+
+        for plane in rgb_planes:
+            dilated_img = cv2.dilate(plane, np.ones((7,7), np.uint8))
+            bg_img = cv2.medianBlur(dilated_img, 21)
+            diff_img = 255 - cv2.absdiff(plane, bg_img)
+            norm_img = cv2.normalize(diff_img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
+            result_norm_planes.append(norm_img)
+            
+        result_norm = cv2.merge(result_norm_planes)
+
+        return result_norm
+    
+    @classmethod
+    def sharpen_filter(cls, image: None):
+
+        if image is None:
+            sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+            filtered_img = cv2.filter2D(cls.image_for_processing, -1, sharpen_kernel)
+        else:
+            sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+            filtered_img = cv2.filter2D(image, -1, sharpen_kernel)
+
+        return filtered_img
+    
+    @classmethod
+    def noise_filter(cls):
+        
+        kernel = np.ones((3, 3), np.uint8)
+        eroded_image = cv2.erode(cls.image_for_processing, kernel)
+        opened_image = cv2.dilate(kernel=kernel, src=eroded_image)
+
+        return opened_image
+    
+    @classmethod
+    def rotation_filter(cls): # WIP not finished yet
+        best_unrotated_image = None
+        best_quality = 1.0
+        
+        for angle in range(-45, 46, 1):
+            unrotated_image = cls.unrotate_image(cls.image_for_processing, angle)
+            quality = cls.measure_quality(cls.image_for_processing, unrotated_image)
+            
+            if quality > best_quality:
+                best_quality = quality
+                best_unrotated_image = unrotated_image
+                print(angle)
+        
+        return best_unrotated_image
+    
+    @classmethod
+    def wrinkle_filter(cls):
+
+        kernel = np.ones((5, 5), np.uint8)
+        kernel2 = np.ones((3, 3), np.uint8)
+
+        morph_image = cv2.morphologyEx(cls.image_for_processing, cv2.MORPH_CLOSE, kernel, iterations=3)
+    
+        # Invert the image to enhance wrinkles
+        inverted_image = cv2.bitwise_not(morph_image)
+        
+        # Combine the inverted image with the original using a weighted average
+        alpha = 0.5
+        beta = 1.0 - alpha
+        unwrinkled_image = cv2.addWeighted(inverted_image, alpha, cls.image_for_processing, beta, 0.0)
+        brighten_image = cv2.convertScaleAbs(unwrinkled_image, alpha=1.5, beta=30)
+        filtered_image = cv2.erode(brighten_image, kernel2, iterations=1)
+        
+        return filtered_image
+    
+if __name__ == '__main__':
+    path = '../noisy_images/wrinkled_image.jpg'
+    BaseClass(path)
+
+    filtered_img = ImageFilter.wrinkle_filter()
+    
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 5),
+                       sharex=True, sharey=True)
+
+    plt.gray()
+
+    ax[0].imshow(BaseClass.image_for_processing, vmin=filtered_img.min(), vmax=filtered_img.max())
+    ax[0].axis('off')
+    ax[0].set_title('Data')
+
+    ax[1].imshow(filtered_img)
+    ax[1].axis('off')
+    ax[1].set_title('Self tuned restoration')
+
+    fig.tight_layout()
+
+    plt.show()

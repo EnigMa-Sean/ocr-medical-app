@@ -135,21 +135,21 @@ def export_to_csv(result_text, result_dict):
     result_df.to_csv('ocr_result.csv', header=False)
 
 if __name__ == '__main__':
-    # pdf_path = 'pdf_files/document_template.pdf'
-    # pdf_to_img(pdf_path)
+    pdf_path = 'pdf_files/document_template.pdf'
+    pdf_to_img(pdf_path)
 
-    img_path = 'images/noise_img.jpg'
-    img = cv2.imread(img_path)
-    rects, rects_coord = detect_tables(img)
+    # img_path = 'images/noise_img.jpg'
+    # img = cv2.imread(img_path)
+    # rects, rects_coord = detect_tables(img)
 
-    result_dict = {}
-    for i_table in range(len(rects)):
-        table = img[rects_coord[i_table][1]:rects_coord[i_table][1]+rects_coord[i_table][3], rects_coord[i_table][0]:rects_coord[i_table][0]+rects_coord[i_table][2]]
-        cv2.imshow("output", table)
-        cv2.waitKey(0)
-        vertical_horizontal_lines = enhance_table_lines(table)
-        table_rects, table_rects_coord = detect_blocks(vertical_horizontal_lines)
-        result_text = img_to_text(table, table_rects_coord)
-        export_to_csv(result_text, result_dict)
+    # result_dict = {}
+    # for i_table in range(len(rects)):
+    #     table = img[rects_coord[i_table][1]:rects_coord[i_table][1]+rects_coord[i_table][3], rects_coord[i_table][0]:rects_coord[i_table][0]+rects_coord[i_table][2]]
+    #     cv2.imshow("output", table)
+    #     cv2.waitKey(0)
+    #     vertical_horizontal_lines = enhance_table_lines(table)
+    #     table_rects, table_rects_coord = detect_blocks(vertical_horizontal_lines)
+    #     result_text = img_to_text(table, table_rects_coord)
+    #     export_to_csv(result_text, result_dict)
             
-        print(result_text)
+    #     print(result_text)
