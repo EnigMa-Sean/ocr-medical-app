@@ -14,10 +14,16 @@ def initiate_ocr():
             # Perform OCR process here
             # You can replace this with your actual OCR code
             print(f"OCR initiated for Folder: {folder_path}, Excel File: {excel_name}")
-            # If successful, you can clear any previous error messages
-            error_label.config(text="")
+
+            # Simulate OCR completion message
+            success_message = f"OCR is finished and saved at {excel_name}"  # Replace output_path with the actual path
+            show_success(success_message)
+
         except Exception as e:
             show_error(f"Error during OCR process: {str(e)}")
+
+def show_success(message):
+    error_label.config(text=message, fg="green")
 
 def browse_folder_path():
     folder_path = filedialog.askopenfilename(filetypes=[("Folder", "")])
@@ -44,20 +50,28 @@ def select_file_type():
 
 def display_file(file_path):
     try:
+        print(f"Attempting to display image from path: {file_path}")
         image = Image.open(file_path)
-        image = image.resize((300, 300), Image.ANTIALIAS)  # Increase the size for clearer display
+        image = image.resize((300, 300), Image.BILINEAR)
         img = ImageTk.PhotoImage(image)
         display_canvas.config(width=300, height=300)
         display_canvas.create_image(0, 0, anchor=tk.NW, image=img)
-        display_canvas.image = img  # Keep a reference to the image
+        display_canvas.image = img
+        error_label.config(text="")
+        print("Image displayed successfully.")
     except Exception as e:
         show_error(f"Error displaying file: {str(e)}")
+        print("Error displaying image:", str(e))
 
 def show_error(message):
-    error_label.config(text=message)
+    error_label.config(text=message, fg="red")
 
 def update_folder_label(folder_path):
     folder_label.config(text=f"Selected Folder: {folder_path}")
+
+def label_function():
+    # Add your label function logic here
+    print("Label Function Called")
 
 # Create the main window with higher DPI
 window = tk.Tk()
@@ -132,12 +146,23 @@ file_type_menu = tk.OptionMenu(left_frame, file_type_var, "Image", "PDF")
 file_type_menu.config(bg=accent_color, fg="white", font=button_font)
 file_type_menu.pack(pady=5)
 
+# Create a button for the label function
+label_button = tk.Button(left_frame, text="Label", command=label_function, bg=accent_color, fg="white", font=button_font)
+label_button.pack(pady=5)
+
 ocr_button = tk.Button(left_frame, text="Initiate OCR", command=initiate_ocr, bg=accent_color, fg="white", font=button_font)
 ocr_button.pack(pady=10)
 
 # Create a label for displaying selected image in the right frame
-display_canvas = tk.Canvas(right_frame, width=150, height=150, bg=background_color)
+display_canvas = tk.Canvas(right_frame, width=300, height=300, bg=background_color)
 display_canvas.pack(pady=10)
+
+# Bind the select_file_type function to the Configure event of file_type_menu
+file_type_menu.bind("<Configure>", lambda event: select_file_type())
+
+# Create an error label for displaying error messages
+error_label = tk.Label(left_frame, text="", font=("Helvetica", 10), bg=background_color, fg="red")
+error_label.pack(pady=5)
 
 # Start the Tkinter event loop
 window.mainloop()
