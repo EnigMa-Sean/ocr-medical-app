@@ -34,35 +34,33 @@ def detect_tables(img):
     return rects, rects_coord
 
 def enhance_table_lines(table):
-    thresh,table_bin = cv2.threshold(table,128,255,cv2.THRESH_BINARY)
+    thresh,table_bin = cv2.threshold(table,160,255,cv2.THRESH_BINARY)
     table_bin = 255-table_bin
-    # plotting = plt.imshow(table_bin,cmap='gray')
-    # plt.title("Inverted Image with global thresh holding")
-    # plt.show()
+    cv2.imshow('table_bin', table_bin)
+    cv2.waitKey(0)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (4, 4))
     vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, np.array(table).shape[1]//150))
     eroded_image = cv2.erode(table_bin, vertical_kernel, iterations=5)
     vertical_lines = cv2.dilate(eroded_image, vertical_kernel, iterations=5)
-
-    # plt.imshow(vertical_lines, cmap='gray')
-    # plt.show()
+    cv2.imshow('vertical', vertical_lines)
+    cv2.waitKey(0)
 
     hor_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (np.array(table).shape[1]//150, 1))
     table_2 = cv2.erode(table_bin, hor_kernel, iterations=5)
     horizontal_lines = cv2.dilate(table_2, hor_kernel, iterations=5)
-
-    # plt.imshow(horizontal_lines, cmap='gray')
-    # plt.show()
+    cv2.imshow('horizontal', horizontal_lines)
+    cv2.waitKey(0)
 
     vertical_horizontal_lines = cv2.addWeighted(vertical_lines, 0.5, horizontal_lines, 0.5, 0.0)
     vertical_horizontal_lines = cv2.erode(~vertical_horizontal_lines, kernel, iterations=3)
 
     thresh, vertical_horizontal_lines = cv2.threshold(vertical_horizontal_lines,128,255, cv2.THRESH_BINARY)
     b_table = cv2.bitwise_not(cv2.bitwise_xor(table,vertical_horizontal_lines))
-    # plotting = plt.imshow(b_table,cmap='gray')
-    # plt.show()
+    cv2.imshow('enhanced', b_table)
+    cv2.waitKey(0)
 
+    cv2.destroyAllWindows()
     return vertical_horizontal_lines
 
 def detect_blocks(table):
@@ -83,9 +81,7 @@ def detect_blocks(table):
             table_rects.append(table_polygon)
             table_x, table_y, table_w, table_h = cv2.boundingRect(table_polygon)
             table_rects_coord.append([table_x, table_y, table_w, table_h])
-        else:
-            print('Cannot find blocks within the table')
-    
+    # table_rects_coord = sorted(table_rects_coord, key=lambda x: x[1])
     return table_rects, table_rects_coord
 
 def img_to_text(table, table_rects_coord):
@@ -93,8 +89,8 @@ def img_to_text(table, table_rects_coord):
     for num_table in range(len(table_rects_coord)):
         block = table[table_rects_coord[num_table][1]:table_rects_coord[num_table][1]+table_rects_coord[num_table][3],
                         table_rects_coord[num_table][0]:table_rects_coord[num_table][0]+table_rects_coord[num_table][2]]
-        cv2.imshow("output", block)
-        cv2.waitKey(0)
+        # cv2.imshow("output", block)
+        # cv2.waitKey(0)
         text = pytesseract.image_to_string(block, lang='eng', config='--psm 4')
         text = re.sub(r'\n', ' ', text)
         result_text.append(text)
@@ -102,7 +98,7 @@ def img_to_text(table, table_rects_coord):
     result_text = list(reversed(result_text))
     return result_text
 
-def export_to_csv(result_text, result_dict):
+def text_to_dict(result_text, result_dict):
     if len(result_text) == 18:
         region = 'Patient Demographics'
         result_dict[region] = None
@@ -130,26 +126,26 @@ def export_to_csv(result_text, result_dict):
         result_dict['Details'] = result_text[0]
     else:
         print('Cannot find matched template')
-
-    result_df = pd.DataFrame.from_dict(result_dict, orient='index')
-    result_df.to_csv('ocr_result.csv', header=False)
+    return result_dict
 
 if __name__ == '__main__':
     pdf_path = 'pdf_files/document_template.pdf'
     pdf_to_img(pdf_path)
 
-    # img_path = 'images/noise_img.jpg'
-    # img = cv2.imread(img_path)
-    # rects, rects_coord = detect_tables(img)
+    img_path = 'images/document_template.jpg'
+    # img_path = 'noisy_images/wrinkled_image.jpg'
+    img = cv2.imread(img_path)
+    rects, rects_coord = detect_tables(img)
 
-    # result_dict = {}
-    # for i_table in range(len(rects)):
-    #     table = img[rects_coord[i_table][1]:rects_coord[i_table][1]+rects_coord[i_table][3], rects_coord[i_table][0]:rects_coord[i_table][0]+rects_coord[i_table][2]]
-    #     cv2.imshow("output", table)
-    #     cv2.waitKey(0)
-    #     vertical_horizontal_lines = enhance_table_lines(table)
-    #     table_rects, table_rects_coord = detect_blocks(vertical_horizontal_lines)
-    #     result_text = img_to_text(table, table_rects_coord)
-    #     export_to_csv(result_text, result_dict)
-            
-    #     print(result_text)
+    result_dict = {}
+    print(len(rects))
+    for i_table in range(len(rects)):
+        table = img[rects_coord[i_table][1]:rects_coord[i_table][1]+rects_coord[i_table][3], rects_coord[i_table][0]:rects_coord[i_table][0]+rects_coord[i_table][2]]
+        # cv2.imshow("output", table)
+        # cv2.waitKey(0)
+        vertical_horizontal_lines = enhance_table_lines(table)
+        table_rects, table_rects_coord = detect_blocks(vertical_horizontal_lines)
+        result_text = img_to_text(table, table_rects_coord)
+        result_dict = text_to_dict(result_text, result_dict)
+    result_df = pd.DataFrame.from_dict(result_dict, orient='index')
+    result_df.to_csv('ocr_result.csv', header=False)
