@@ -17,7 +17,7 @@ def ui_init():
     dpg.create_viewport(title=APPS_UI_TITLE , width=APPS_UI_WIDTH_DEFAULT , height=APPS_UI_HEIGHT_DEFAULT)
 
     dpg.setup_dearpygui()
-    ui_applyDisaledTheme() # Add global disabled theme
+    ui_applyDisabledTheme() # Add global disabled theme
 
 
 # --- Step 3 : Start Renderer Loop ---
@@ -29,7 +29,7 @@ def ui_startRenderer():
 
 
 # --- Global Disabled Theme ---
-def ui_applyDisaledTheme():
+def ui_applyDisabledTheme():
     bg_color = [40, 40, 40, 160]
     gray_color = [60, 60, 60, 160]
     with dpg.theme() as disabled_theme:
