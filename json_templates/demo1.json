@@ -1,0 +1,1 @@
+{"template_name": "demo1", "image_file_name": null, "region_1": {"title": "patient-info", "key_values": {"name": "Sean", "age": "21", "date-of-birth": "01/08/2002"}}, "region_2": {"title": "clinical_data", "key_values": {"height": "192", "weight": "88", "blood-pressure": "125/94", "heart-beat": "60"}}}
