@@ -52,9 +52,6 @@ class ImageCropper:
         self.buttonState = new_state
 
     def callback_enter(self):
-        # user_answer = askyesno('Confirm', f'Save Title as {self.input_text}')
-        # if user_answer == True:
-        #     print("yes")
         self.get_value = True
 
     def set_get_value_flag(self, value):

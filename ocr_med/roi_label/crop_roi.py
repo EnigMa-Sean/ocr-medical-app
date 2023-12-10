@@ -8,7 +8,7 @@ from ocr_med.json_functions.file_functions import FileFunctions
 ROOT_PATH :str = Path(__file__).parents[2]
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'       
 
-class CropROT:
+class CropROI:
     def __init__(self):
         self.file_functions = FileFunctions()
         self.pdf_path = os.path.join(ROOT_PATH, "data\pdf")
@@ -64,7 +64,7 @@ class CropROT:
 # load the image, clone it, and setup the mouse callback function 
 if __name__ == '__main__':
 
-    crop_roi = CropROT()
+    crop_roi = CropROI()
     file_name = 'GCA RE'
 
     crop_roi.pdf2image(file_name=file_name)
