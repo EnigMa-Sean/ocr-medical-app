@@ -1,0 +1,14 @@
+file_name,region_title,key_value,value
+,patient-information,,
+,,Name,Yun
+,,Age,1001
+,,date-of-birth,01/01/1899
+,,favorite-game,baldurs gate 2
+,,favorite-food,noodles
+,,,
+,clinical_data,,
+,,height,200
+,,weight,65
+,,blood-pressure,200/30
+,,heart-rate,500
+,,,
