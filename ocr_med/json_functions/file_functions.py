@@ -1,19 +1,19 @@
 import json
 import os
 import csv
+from pathlib import Path
+
+ROOT_PATH :str = Path(__file__).parents[2]
 
 class FileFunctions:
     def __init__(self, file_name: str = None, template_name: str = None):
 
         self.base_dict = {'template_name': template_name, 
-                          'image_file_name': file_name,
-                          'region_1': { 'title': None, 
-                                        'key_values': {}
-                                    },                 
+                          'image_file_name': file_name,               
                         }
         
         self.latest_key: str
-        self.latest_region: str = 'region_1'
+        self.latest_region: str
 
     def add_image_file_name(self, image_file_name: str):
         self.base_dict['image_file_name'] = image_file_name
@@ -48,14 +48,12 @@ class FileFunctions:
     def create_file_path(template_name: str, file_type: str = 'json') -> str:
 
         if file_type == 'json':
-            storage_directory = os.path.join(os.path.dirname(__file__), '..', '..', 'json_templates')
-            absolute_path = os.path.abspath(storage_directory)
-            file_path = os.path.join(absolute_path, f'{template_name}.json')
+            storage_directory = os.path.join(ROOT_PATH, 'templates')
+            file_path = os.path.join(storage_directory, f'{template_name}.json')
 
         elif file_type == 'csv':
-            storage_directory = os.path.join(os.path.dirname(__file__), '..', '..', 'csv_files')
-            absolute_path = os.path.abspath(storage_directory)
-            file_path = os.path.join(absolute_path, f'{template_name}.csv')
+            storage_directory = os.path.join(ROOT_PATH, 'reports')
+            file_path = os.path.join(storage_directory, f'{template_name}.csv')
 
         else:
             raise ValueError(f'File type {file_type} is not supported.')
@@ -78,15 +76,12 @@ class FileFunctions:
 
         csv_file_path = FileFunctions.create_file_path(template_name=template_name, file_type='csv')
         with open(csv_file_path, 'w', newline='') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=['file_name', 'region_title', 'key_value', 'value'])
+            writer = csv.DictWriter(csv_file, fieldnames=['region_title', 'topic', 'value'])
             writer.writeheader()
-
-            if data['image_file_name'] is not None:
-                writer.writerow({'file_name': data['image_file_name']})
 
             for key_value, value in dict_items.items():
                 writer.writerow({'region_title': data[key_value]['title']})
-                writer.writerows([{'key_value': key, 'value': value} for key, value in value])
+                writer.writerows([{'topic': key, 'value': value} for key, value in value])
                 writer.writerow({})
 
         print(f"CSV file exported successfully: {csv_file_path}")

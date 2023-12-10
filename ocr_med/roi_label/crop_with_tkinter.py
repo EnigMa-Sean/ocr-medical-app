@@ -12,6 +12,7 @@ from pathlib import Path
 import threading
 from ocr_med.json_functions.file_functions import FileFunctions
 
+pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
 
 class ImageCropper:
     def __init__(self, root, image):
@@ -36,6 +37,7 @@ class ImageCropper:
         self.entry1.pack(side = TOP, ipadx = 30, ipady = 10) 
         self.enter = ttk.Button(self.root, text = 'Enter', command = lambda : self.callback_enter()) 
         self.enter.pack(side = TOP, pady = 10) 
+
         # Buttons for selecting the type of input
         self.button_template = ttk.Button(self.root, text="Template Name", command=lambda: self.change_state(1))
         self.button_title = ttk.Button(self.root, text="Title", command=lambda: self.change_state(2))
@@ -50,10 +52,10 @@ class ImageCropper:
         self.buttonState = new_state
 
     def callback_enter(self):
-        user_answer = askyesno('Confirm', f'Save Title as {self.input_text}')
-        if user_answer == True:
-            print("yes")
-            self.get_value = True
+        # user_answer = askyesno('Confirm', f'Save Title as {self.input_text}')
+        # if user_answer == True:
+        #     print("yes")
+        self.get_value = True
 
     def set_get_value_flag(self, value):
         self.get_value = value
@@ -100,7 +102,10 @@ class ImageCropper:
                     self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 4')
                     self.get_value = True
             
-            if key==27:
+            if key==27: # ESC
+                print(file_functions.base_dict)
+                file_functions.save_template_json()
+                file_functions.export_json_csv(file_functions.base_dict['template_name'])
                 break
             
             if key == ord("c"): # Clear the selection when 'c' is pressed 
@@ -114,18 +119,17 @@ def add_value_to_json():
         #print(app.button_state())
         if(app.get_value_flag):
             if app.button_state() == 1:
-                dict.base_dict['template_name'] = app.input_text.get()
+                file_functions.base_dict['template_name'] = app.input_text.get()
                 app.set_get_value_flag(False)
-                print(dict.base_dict)
             elif app.button_state() == 2:
-                dict.add_title(app.input_text.get())
-                dict.add_region()
+                file_functions.add_region()
+                file_functions.add_title(app.input_text.get())
                 app.set_get_value_flag(False)
             elif app.button_state() == 3:
-                dict.add_key(app.ocr_text.get())
+                file_functions.add_key(app.ocr_text)
                 app.set_get_value_flag(False)
             elif app.button_state() == 4:
-                dict.add_value(app.image_roi.get())
+                file_functions.add_value(app.roi_coordinates)
                 app.set_get_value_flag(False)
             else:
                 print("Error")
@@ -143,12 +147,13 @@ if __name__ == "__main__":
 
     root = tk.Tk()
     app = ImageCropper(root, image)
-    dict = FileFunctions()
+    file_functions = FileFunctions()
+
     cv2_thread =threading.Thread(target=app.crop_image)
     cv2_thread.start()
     add_value_thread = threading.Thread(target=add_value_to_json)
     add_value_thread.start()
-    print(dict.base_dict)
+
     root.mainloop()
     
     
