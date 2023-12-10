@@ -21,25 +21,32 @@ def initiate_ocr():
         except Exception as e:
             show_error(f"Error during OCR process: {str(e)}")
 
-
-
 def create_template_window():
     template_window = tk.Toplevel(window)
     template_window.title("Create Template")
-    template_window.geometry("500x500")
+    template_window.geometry("825x330")
 
-    # Buttons in a grid layout
-    loadtemplate_button = tk.Button(template_window, text="Load Template", command=lambda: label_function_example("Select Template"), width=15)
-    loadtemplate_button.grid(row=0, column=2, padx=10, pady=10)
+    # Buttons and Entry widgets in a grid layout
+    loadtemplate_label = tk.Label(template_window, text="Load Existing Template", font=("Helvetica", 10), bg=background_color, fg=text_color)
+    loadtemplate_label.grid(row=0, column=2, padx=10, pady=10)
+
+    template_path_entry = tk.Entry(template_window, width=40, font=("Helvetica", 10))
+    template_path_entry.grid(row=1, column=2, padx=10, pady=10)
+
+    browse_template_button = tk.Button(template_window, text="Browse", command=lambda: browse_template_path(template_path_entry), width=10)
+    browse_template_button.grid(row=2, column=2, padx=5, pady=10)
+
+    createnewtemplate_label = tk.Label(template_window, text="Create New Template", font=("Helvetica", 10), bg=background_color, fg=text_color)
+    createnewtemplate_label.grid(row=3, column=2, padx=10, pady=10)
 
     header_button = tk.Button(template_window, text="Header", command=lambda: label_function_example("Header"), width=15)
-    header_button.grid(row=1, column=1, padx=10, pady=10)
+    header_button.grid(row=4, column=1, padx=10, pady=10)
 
     value_button = tk.Button(template_window, text="Value", command=lambda: label_function_example("Value"), width=15)
-    value_button.grid(row=1, column=2, padx=10, pady=10)
+    value_button.grid(row=4, column=2, padx=10, pady=10)
 
-    save_button = tk.Button(template_window, text="Save to Template", command=lambda: label_function_example("Save"), width=15)
-    save_button.grid(row=1, column=3, padx=10, pady=10)
+    save_button = tk.Button(template_window, text="Save New Template", command=lambda: label_function_example("Save"), width=15)
+    save_button.grid(row=4, column=3, padx=10, pady=10)
 
 
 def label_function_example(label_type):
@@ -47,8 +54,15 @@ def label_function_example(label_type):
 
 #Add Save to Template function here (Header, Value, Save) and change in line 30 33 36 
 
-def show_success(message):
-    error_label.config(text=message, fg="green")
+#This is the function for browse button in create template window 
+def browse_template_path(template_entry):
+    template_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
+    template_entry.delete(0, tk.END)
+    template_entry.insert(0, template_path)
+#call to get template path
+def get_template_path():
+    template_path = browse_template_path.template_path_entry.get()
+    return template_path
 
 def browse_folder_path():
     folder_path = filedialog.askopenfilename(filetypes=[("Folder", "")])
@@ -57,9 +71,10 @@ def browse_folder_path():
     update_folder_label(folder_path)
 
 def browse_excel_path():
-    excel_path = filedialog.askopenfilename(filetypes=[("Excel Files", "*.xlsx;*.xls")])
+    output_path = filedialog.askdirectory()
     excel_name_entry.delete(0, tk.END)
-    excel_name_entry.insert(0, excel_path)
+    excel_name_entry.insert(0, output_path)
+    return output_path
 
 def select_file_type():
     return file_type_var.get()
@@ -107,7 +122,7 @@ def show_error(message):
     error_label.config(text=message, fg="red")
 
 def update_folder_label(folder_path):
-    folder_label.config(text=f"Selected Folder: {folder_path}")
+    folder_label.config(text=f"Selected: {folder_path}")
 
 def label_function():
     # Add Jean label function here
@@ -165,8 +180,8 @@ style = ttk.Style()
 style.configure("left.TFrame", background=background_color)
 
 # Create and pack widgets with modern styling for the left frame
-title_font = ("Helvetica", 20, "bold")
-button_font = ("Helvetica", 12)
+title_font = ("Helvetica", 16, "bold")
+button_font = ("Helvetica", 10)
 
 #Right Frame configuration
 datapreview_label = tk.Label(right_frame, text="Data Preview", font=button_font, bg=background_color, fg=text_color)
@@ -188,19 +203,10 @@ folder_path_entry.pack(pady=5)
 browse_button = tk.Button(left_frame, text="Browse", command=browse_folder_path, bg=accent_color, fg="white", font=button_font, width=20)
 browse_button.pack(pady=5)
 
-folder_label = tk.Label(left_frame, text="Selected File:", font=("Helvetica", 10), bg=background_color, fg=text_color)
+folder_label = tk.Label(left_frame, text="Selected File:", font=("Helvetica", 8), bg=background_color, fg=text_color)
 folder_label.pack(pady=5)
 
-excel_name_label = tk.Label(left_frame, text="2. Select Excel file for saving result:", font=button_font, bg=background_color, fg=text_color)
-excel_name_label.pack()
-
-excel_name_entry = tk.Entry(left_frame, width=40, font=("Helvetica", 10))
-excel_name_entry.pack(pady=5)
-
-browse_excel_button = tk.Button(left_frame, text="Browse", command=browse_excel_path, bg=accent_color, fg="white", font=button_font, width=20)
-browse_excel_button.pack(pady=5)
-
-file_type_label = tk.Label(left_frame, text="3. Select File Type (Image or PDF):", font=button_font, bg=background_color, fg=text_color)
+file_type_label = tk.Label(left_frame, text="2. Select File Type (Image or PDF):", font=button_font, bg=background_color, fg=text_color)
 file_type_label.pack()
 
 file_type_var = tk.StringVar()
@@ -210,9 +216,25 @@ file_type_menu = tk.OptionMenu(left_frame, file_type_var, "Image", "PDF")
 file_type_menu.config(bg=accent_color, fg="white", font=button_font)
 file_type_menu.pack(pady=5)
 
+excel_name_label = tk.Label(left_frame, text="3. Select Excel file for saving result:", font=button_font, bg=background_color, fg=text_color)
+excel_name_label.pack()
+
+excel_name_entry = tk.Entry(left_frame, width=40, font=("Helvetica", 10))
+excel_name_entry.pack(pady=5)
+
+excel_label = tk.Label(left_frame, text="Selected Folder:", font=("Helvetica", 8), bg=background_color, fg=text_color)
+excel_label.pack(pady=5)
+
+browse_excel_button = tk.Button(left_frame, text="Browse", command=browse_excel_path, bg=accent_color, fg="white", font=button_font, width=20)
+browse_excel_button.pack(pady=5)
+
+#Menu button
+menu_label = tk.Label(left_frame, text="Menu", font=button_font, bg=background_color, fg=text_color)
+menu_label.pack()
+
 # Create a button for the "Display Selected File" function
-display_file_button = tk.Button(left_frame, text="Display Selected File", command=display_selected_file, bg=accent_color, fg="white", font=button_font, width=20)
-display_file_button.pack(pady=10)
+display_file_button = tk.Button(left_frame, text="Preview Selected File", command=display_selected_file, bg=accent_color, fg="white", font=button_font, width=20)
+display_file_button.pack(pady=5)
 display_file_button.config(command=display_selected_file)
 
 # Create a button for the "Create Template" function
@@ -220,7 +242,7 @@ create_template_button = tk.Button(left_frame, text="Template", command=create_t
 create_template_button.pack(pady=5)
 
 # Create a button for the label function
-label_button = tk.Button(left_frame, text="Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
+label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
 label_button.pack(pady=5)
 
 # Create a button for the ocr function
