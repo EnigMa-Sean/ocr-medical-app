@@ -2,8 +2,10 @@ import os
 import cv2
 from pdf2image import convert_from_path
 import pytesseract
+from ocr_med.json_functions.file_functions import FileFunctions
 
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'       
+ff = FileFunctions()
 
 # Defining the event listener (callback function)
 def shape_selection(event, x, y, flags, param): 
