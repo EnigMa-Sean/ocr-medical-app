@@ -40,58 +40,60 @@ class FileFunctions:
         self.base_dict[self.latest_region]['key_values'][key] = value
 
     def save_template_json(self):
-        file_path = self.create_file_path(self.base_dict.get('template_name'))
+        file_path = self.create_file_path(self.base_dict.get('template_name'), file_type='json')
         with open(file_path, 'w') as file:
             json.dump(self.base_dict, file)
         
     @staticmethod
-    def create_file_path(template_name: str) -> str:
-        storage_directory = os.path.join(os.path.dirname(__file__), '..', '..', 'json_templates')
-        absolute_path = os.path.abspath(storage_directory)
-        file_path = os.path.join(absolute_path, f'{template_name}.json')
+    def create_file_path(template_name: str, file_type: str = 'json') -> str:
+
+        if file_type == 'json':
+            storage_directory = os.path.join(os.path.dirname(__file__), '..', '..', 'json_templates')
+            absolute_path = os.path.abspath(storage_directory)
+            file_path = os.path.join(absolute_path, f'{template_name}.json')
+
+        elif file_type == 'csv':
+            storage_directory = os.path.join(os.path.dirname(__file__), '..', '..', 'csv_files')
+            absolute_path = os.path.abspath(storage_directory)
+            file_path = os.path.join(absolute_path, f'{template_name}.csv')
+
+        else:
+            raise ValueError(f'File type {file_type} is not supported.')
 
         return file_path
 
     @staticmethod
     def export_json_csv(template_name: str):
 
-        file_path = FileFunctions.create_file_path(template_name=template_name)
+        json_file_path = FileFunctions.create_file_path(template_name=template_name, file_type='json')
 
-        with open(file_path, 'r') as json_file:
+        with open(json_file_path, 'r') as json_file:
             data = json.load(json_file)
 
-        # Extract keys from the JSON data
-        keys = set()
-        for region in data.values():
-            print(region)
-            for key in region['key_values'].keys():
-                keys.add(key)
+        number_of_regions = len(data) - 2
+        dict_items = {}
 
-        # Prepare CSV file
-        csv_file_path = file_path.replace('.json', '.csv')
+        for region_num in range(number_of_regions):
+            dict_items[f'region_{region_num+1}'] = data[f'region_{region_num+1}']['key_values'].items()
+
+        csv_file_path = FileFunctions.create_file_path(template_name=template_name, file_type='csv')
         with open(csv_file_path, 'w', newline='') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=['template_name', 'image_file_name', 'region', 'title'] + list(keys))
+            writer = csv.DictWriter(csv_file, fieldnames=['file_name', 'region_title', 'key_value', 'value'])
             writer.writeheader()
 
-            # Write data to CSV file
-            for region_num, region in data.items():
-                for key, value in region['key_values'].items():
-                    row = {
-                        'template_name': data['template_name'],
-                        'image_file_name': data['image_file_name'],
-                        'region': region_num,
-                        'title': region['title']
-                    }
-                    row[key] = value
-                    writer.writerow(row)
+            if data['image_file_name'] is not None:
+                writer.writerow({'file_name': data['image_file_name']})
+
+            for key_value, value in dict_items.items():
+                writer.writerow({'region_title': data[key_value]['title']})
+                writer.writerows([{'key_value': key, 'value': value} for key, value in value])
+                writer.writerow({})
 
         print(f"CSV file exported successfully: {csv_file_path}")
 
 if __name__ == '__main__':
 
 # ----- Example of using the functions to create a JSON file -----
-
-    # FileFunctions.export_json_csv('demo1')
 
     template_name = input("What is the name of this template? ")
 
@@ -110,7 +112,7 @@ if __name__ == '__main__':
         if input("Do you want to add another region? ") == 'no':
             print(dict.base_dict)
             dict.save_template_json()
-            # FileFunctions.export_json_csv(dict.base_dict.get('template_name'))
+            FileFunctions.export_json_csv(dict.base_dict.get('template_name'))
             break
 
         else:
