@@ -4,6 +4,7 @@ from pathlib import Path
 from pdf2image import convert_from_path
 import pytesseract
 from ocr_med.json_functions.file_functions import FileFunctions
+import re
 
 ROOT_PATH :str = Path(__file__).parents[2]
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'       
@@ -53,6 +54,7 @@ class CropROI:
                     image_roi = self.image_copy[self.coordinates[0][1]:self.coordinates[1][1], 
                                             self.coordinates[0][0]:self.coordinates[1][0]]
                     text = pytesseract.image_to_string(image_roi, lang='eng', config='--psm 4')
+                    text = re.sub(r'\n', '', text)
                     self.list_coordinates.append(self.coordinates)
                     self.list_text.append(text)
             if key==27:

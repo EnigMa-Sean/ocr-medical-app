@@ -3,7 +3,7 @@ from pathlib import Path
 import os
 import json
 import cv2
-from ocr_med.roi_label.crop_roi import CropROI
+import re
 
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
 ROOT_PATH :str = Path(__file__).parents[1]
@@ -23,6 +23,7 @@ def run_ocr(image, template_name):
         for roi_index, roi in enumerate(list_roi):
             image_roi = image[roi[0][1]:roi[1][1], roi[0][0]:roi[1][0]]
             result = pytesseract.image_to_string(image_roi, lang='eng', config='--psm 4')
+            result = re.sub(r'\n', '', result)
             template_dict[region]['key_values'][list_keys[roi_index]] = result 
 
     return template_dict
