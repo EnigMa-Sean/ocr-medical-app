@@ -2,6 +2,12 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 from PIL import Image, ImageTk
 from pdf2image import convert_from_path
+import threading
+import numpy as np
+import cv2
+
+from ocr_med.roi_label import crop_with_tkinter as cwt
+from ocr_med.json_functions.file_functions import FileFunctions
 
 def initiate_ocr():
     folder_path = folder_path_entry.get()   #return type of file_path is string
@@ -39,7 +45,7 @@ def label_function():
 def create_template_window():
     template_window = tk.Toplevel(window)
     template_window.title("Create Template")
-    template_window.geometry("825x330")
+    template_window.geometry("480x330")
 
     # Buttons and Entry widgets in a grid layout
     loadtemplate_label = tk.Label(template_window, text="Load Existing Template", font=("Helvetica", 10), bg=background_color, fg=text_color)
@@ -48,20 +54,14 @@ def create_template_window():
     template_path_entry = tk.Entry(template_window, width=40, font=("Helvetica", 10))
     template_path_entry.grid(row=1, column=2, padx=10, pady=10)
 
-    browse_template_button = tk.Button(template_window, text="Browse", command=lambda: browse_template_path(template_path_entry), width=10)
+    browse_template_button = tk.Button(template_window, text="Browse", command=lambda: browse_template_path(template_path_entry), width=20)
     browse_template_button.grid(row=2, column=2, padx=5, pady=10)
 
     createnewtemplate_label = tk.Label(template_window, text="Create New Template", font=("Helvetica", 10), bg=background_color, fg=text_color)
     createnewtemplate_label.grid(row=3, column=2, padx=10, pady=10)
 
-    header_button = tk.Button(template_window, text="Header", command=lambda: label_function_example("Header"), width=15)
-    header_button.grid(row=4, column=1, padx=10, pady=10)
-
-    value_button = tk.Button(template_window, text="Value", command=lambda: label_function_example("Value"), width=15)
-    value_button.grid(row=4, column=2, padx=10, pady=10)
-
-    save_button = tk.Button(template_window, text="Save New Template", command=lambda: label_function_example("Save"), width=15)
-    save_button.grid(row=4, column=3, padx=10, pady=10)
+    header_button = tk.Button(template_window, text="Create New Template", command=lambda: crop_with_tkinter(), width=20)
+    header_button.grid(row=4, column=2, padx=10, pady=10)
 
 
 def label_function_example(label_type):
@@ -71,12 +71,33 @@ def label_function_example(label_type):
     # For multiple pages pdf
     page_number = page_number_entry.get()
     
-    # Add Jean template(or what ever u like to call) function here, and if want to change button name find this line
-    # create_template_button = tk.Button(left_frame, text="Template", command=create_template_window, bg=accent_color, fg="white", font=button_font, width=20)
-    # and change text="Template" to text="What ever u like to call"
+def crop_with_tkinter():
+    folder_path = folder_path_entry.get()   #return type of file_path is string
+    output_path = excel_name_entry.get()    #return type of output_path is string
+    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
+    # For multiple pages pdf
+    page_number = page_number_entry.get()
 
-    print(f"Label Function Called for {label_type}")
+    if file_type_var == "Image":
+        # For image files
+        image = cv2.imread(folder_path)
+    elif file_type_var == "PDF":
+        # For PDF files
+        pdf_images = convert_pdf_to_images(folder_path)
+        page_index = int(page_number) - 1  # Convert to zero-based index
+        if 0 <= page_index < len(pdf_images):
+            image = np.array(pdf_images[page_index])
 
+    root = tk.Tk()
+    app = cwt.ImageCropper(root, image)
+    file_functions = FileFunctions()
+
+    cv2_thread =threading.Thread(target=app.crop_image)
+    cv2_thread.start()
+    add_value_thread = threading.Thread(target=cwt.add_value_to_json)
+    add_value_thread.start()
+
+    root.mainloop()
 # Add Save to Template function here (Header, Value, Save) and change in line 30 33 36 and if u want a path of file, 
 # Output folder, type or pages copy line 68-72
 
@@ -282,7 +303,7 @@ page_number_entry = tk.Entry(left_frame, width=5, font=("Helvetica", 10), justif
 page_number_entry.pack(pady=5)
 page_number_entry.insert(0, "1")  # Set default value to 1
 
-excel_name_label = tk.Label(left_frame, text="3. Select Excel file for saving result:", font=button_font, bg=background_color, fg=text_color)
+excel_name_label = tk.Label(left_frame, text="3. Select Folder for saving result:", font=button_font, bg=background_color, fg=text_color)
 excel_name_label.pack()
 
 excel_name_entry = tk.Entry(left_frame, width=40, font=("Helvetica", 10))
