@@ -66,6 +66,8 @@ class ImageCropper:
         self.max_zoom = 5
         self.x_offset = 0
         self.y_offset = 0
+        
+        self.file_functions = FileFunctions()
 
     def change_state(self, new_state):
         self.buttonState = new_state
@@ -220,6 +222,45 @@ class ImageCropper:
             cv2.rectangle(self.new_image, self.plot_roi_coordinates[0], self.plot_roi_coordinates[1], (0,255,255), 2) 
             cv2.imshow("Image", self.new_image) 
 
+    def main(self):
+        while True:
+            try:
+                if self.get_value_flag:
+                    if self.get_button_state == 1:
+                        if self.get_input_text.get():
+                            self.file_function.base_dict['template_name'] = self.get_input_text.get()
+                            self.show_success("Add template name by typing")
+                        else: 
+                            self.show_error("Please identify template name by typing")
+                    elif self.get_button_state == 2:
+                        self.file_function.add_region()
+                        if self.get_input_text.get():
+                            self.file_function.add_title(self.get_input_text.get())
+                            self.show_success("Successfully add title by typing")
+                        else:
+                            self.file_function.add_title(self.get_ocr_text)
+                            self.show_success("Successfully add title by OCR croping")
+                    elif self.get_button_state == 3:
+                        if self.file_function.base_dict[self.file_function.latest_region]['title'] == None:
+                            self.show_error("Please add a title before adding a header")
+                        else:
+                            if self.get_input_text.get():
+                                self.file_function.add_key(self.get_input_text.get())
+                                self.show_success("Successfully add key by typing")
+                            else:
+                                self.file_function.add_key(self.get_ocr_text)
+                                self.show_success("Successfully add key by OCR croping")
+                    elif self.get_button_state == 4:
+                        if self.get_input_text.get():
+                            self.show_error("Please crop from the image to get the value")
+                        else:
+                            self.file_function.add_value(self.get_roi_coordinate)
+                            self.show_success("Successfully add ROI coordinates as value")
+                    self.set_get_value_flag(False)
+                if self.get_exit_flag:
+                    sys.exit(0)
+            except Exception as e:
+                self.show_error(f"An error occurred: {e}, Please try again.")
 
 def main():
     while True:

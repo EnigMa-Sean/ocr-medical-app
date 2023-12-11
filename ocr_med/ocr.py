@@ -11,7 +11,7 @@ ROOT_PATH :str = Path(__file__).parents[1]
 def run_ocr(image, template_name):
 
     json_file = os.path.join(ROOT_PATH, 'templates')
-    template = os.path.join(json_file, f'{template_name}.json')
+    template = os.path.join(json_file, f'{template_name}')
 
     with open(template, 'r') as file:
         template_dict = json.load(file)
