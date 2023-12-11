@@ -8,7 +8,7 @@ import re
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
 ROOT_PATH :str = Path(__file__).parents[1]
 
-def run_ocr(image, template_name):
+def run_ocr(image, template_name, file_name):
 
     json_file = os.path.join(ROOT_PATH, 'templates')
     template = os.path.join(json_file, f'{template_name}')
@@ -25,7 +25,7 @@ def run_ocr(image, template_name):
             result = pytesseract.image_to_string(image_roi, lang='eng', config='--psm 4')
             result = re.sub(r'\n', '', result)
             template_dict[region]['key_values'][list_keys[roi_index]] = result 
-
+    template_dict['image_file_name'] = file_name
     return template_dict
 
 if __name__ == "__main__":
