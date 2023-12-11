@@ -219,6 +219,7 @@ class ImageCropper:
                 if len(self.roi_coordinates) == 2:
                     self.image_roi = image_copy[self.roi_coordinates[0][1]:self.roi_coordinates[1][1], 
                                         self.roi_coordinates[0][0]:self.roi_coordinates[1][0]]
+                    # self.image_roi = cv2.cvtColor(self.image_roi, cv2.COLOR_BGR2GRAY)
                     self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 4')
                     self.ocr_text = re.sub(r'\n', '', self.ocr_text)
                     print(self.ocr_text)

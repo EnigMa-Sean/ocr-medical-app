@@ -25,7 +25,10 @@ def initiate_ocr():
 
         except Exception as e:
             show_error(f"Error during OCR process: {str(e)}")
-    print(run_ocr(folder_path, template_path))
+    image = cv2.imread(folder_path)
+    result_ocr = run_ocr(image, template_path)
+    FileFunctions.export_json_csv(result_ocr, output_path)
+
 
 def label_function():
     folder_path = folder_path_entry.get()   #return type of file_path is string

@@ -61,12 +61,9 @@ class FileFunctions:
         return file_path
 
     @staticmethod
-    def export_json_csv(template_name: str):
+    def export_json_csv(dict_result: dict, csv_file_path: str):
 
-        json_file_path = FileFunctions.create_file_path(template_name=template_name, file_type='json')
-
-        with open(json_file_path, 'r') as json_file:
-            data = json.load(json_file)
+        data = dict_result
 
         number_of_regions = len(data) - 2
         dict_items = {}
@@ -74,8 +71,8 @@ class FileFunctions:
         for region_num in range(number_of_regions):
             dict_items[f'region_{region_num+1}'] = data[f'region_{region_num+1}']['key_values'].items()
 
-        csv_file_path = FileFunctions.create_file_path(template_name=template_name, file_type='csv')
-        with open(csv_file_path, 'w', newline='') as csv_file:
+        csv_file = os.path.join(csv_file_path, f'{dict_result.get("template_name")}.csv')
+        with open(csv_file, 'w', newline='') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=['region_title', 'topic', 'value'])
             writer.writeheader()
 
