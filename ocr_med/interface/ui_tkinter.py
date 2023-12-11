@@ -25,7 +25,6 @@ def initiate_ocr():
 
         except Exception as e:
             show_error(f"Error during OCR process: {str(e)}")
-    image = cv2.imread(folder_path)
     result_ocr = run_ocr(image, template_path)
     FileFunctions.export_json_csv(result_ocr, output_path)
 
@@ -47,7 +46,6 @@ def label_function():
         if 0 <= page_index < len(pdf_images):
             image = np.array(pdf_images[page_index])
     
-    image = cv2.imread(folder_path)
     cropper = cwt.ImageCropper(image)
 
     # Add Jean label(or what ever u like to call) function here, and if want to change button name find this line

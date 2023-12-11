@@ -97,8 +97,8 @@ class ImageCropper:
             self.show_success("Press Botton for Label")
 
     def save_template_json(self):
-        file_functions.save_template_json()
-        self.show_success(f"Successfully save template at {file_functions.create_file_path(file_functions.base_dict.get('template_name'), file_type='json')}")
+        self.file_functions.save_template_json()
+        self.show_success(f"Successfully save template at {self.file_functions.create_file_path(self.file_functions.base_dict.get('template_name'), file_type='json')}")
         #file_functions.export_json_csv(file_functions.base_dict['template_name'])
 
     def callback_enter(self):
@@ -227,7 +227,6 @@ class ImageCropper:
             
             if key==27: # ESC
                 print("Exiting")
-                print(file_functions.base_dict)
                 cv2.destroyAllWindows()
                 self.exitFlag = True
                 sys.exit(0)
@@ -240,57 +239,44 @@ class ImageCropper:
             try:
                 if self.get_value_text_flag:
                     if self.get_button_state == 1:
-                        file_functions.base_dict['template_name'] = self.get_input_text.get()
+                        self.file_functions.base_dict['template_name'] = self.get_input_text.get()
                         self.show_success("Add template name by typing")
-                        print(file_functions.base_dict)
                     elif self.get_button_state == 2:
-                        file_functions.add_region()
-                        file_functions.add_title(self.get_input_text.get())
+                        self.file_functions.add_region()
+                        self.file_functions.add_title(self.get_input_text.get())
                         self.show_success("Successfully add title by typing")
-                        print(file_functions.base_dict)
                     elif self.get_button_state == 3:
-                        if file_functions.base_dict[file_functions.latest_region]['title'] == None:
+                        if self.file_functions.base_dict[self.file_functions.latest_region]['title'] == None:
                             self.show_error("Please add a title before adding a header")
-                            print(file_functions.base_dict)
                         else:
-                            file_functions.add_key(self.get_input_text.get())
+                            self.file_functions.add_key(self.get_input_text.get())
                             self.show_success("Successfully add key by typing")
-                            print(file_functions.base_dict)
                     elif self.get_button_state == 4:
                         self.show_error("Please crop from the image to get the value")
-                        print(file_functions.base_dict)
                     else:   
                         self.show_error("Please select a mode")
-                        print(file_functions.base_dict)
                     self.reset_get_value_text_flag()
 
 
                 elif self.get_value_ocr_flag:
                     if self.get_button_state == 1:
                         self.show_error("Please identify template name by typing")
-                        print(file_functions.base_dict)
                     elif self.get_button_state == 2:
                         self.show_error("Please identify title name by typing")
-                        print(file_functions.base_dict)
                     elif self.get_button_state == 3:
-                        if file_functions.base_dict[file_functions.latest_region]['title'] == None:
+                        if self.file_functions.base_dict[self.file_functions.latest_region]['title'] == None:
                             self.show_error("Please add a title before adding a header")
-                            print(file_functions.base_dict)
                         else:
-                            file_functions.add_key(self.get_ocr_text)
+                            self.file_functions.add_key(self.get_ocr_text)
                             self.show_success("Successfully add key by OCR croping")
-                            print(file_functions.base_dict)
                     elif self.get_button_state == 4:
-                        if file_functions.base_dict[file_functions.latest_region]['title'] == None:
+                        if self.file_functions.base_dict[self.file_functions.latest_region]['title'] == None:
                             self.show_error("Please add a title before adding a header")
-                            print(file_functions.base_dict)
                         else:
-                            file_functions.add_value(self.get_roi_coordinate)
+                            self.file_functions.add_value(self.get_roi_coordinate)
                             self.show_success("Successfully add value by OCR croping")
-                            print(file_functions.base_dict)
                     else: 
                         self.show_error("Please select a mode")
-                        print(file_functions.base_dict)
                     self.reset_get_value_ocr_flag()
                     
             
