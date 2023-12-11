@@ -74,7 +74,6 @@ class ImageCropper:
         self.file_functions = FileFunctions()
 
 
-
     def show_success(self, message):
         self.status_label.config(text=message, fg="green")
 
@@ -98,9 +97,9 @@ class ImageCropper:
             self.show_success("Press Botton for Label")
 
     def save_template_json(self):
+        print(self.file_functions.base_dict)
         self.file_functions.save_template_json()
         self.show_success(f"Successfully save template at {self.file_functions.create_file_path(self.file_functions.base_dict.get('template_name'), file_type='json')}")
-        #file_functions.export_json_csv(file_functions.base_dict['template_name'])
 
     def callback_enter(self):
         self.get_value_text = True
@@ -223,7 +222,7 @@ class ImageCropper:
                     # self.image_roi = cv2.cvtColor(self.image_roi, cv2.COLOR_BGR2GRAY)
                     self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 4')
                     self.ocr_text = re.sub(r'\n', '', self.ocr_text)
-                    print(self.ocr_text)
+                    # print(self.ocr_text)
                     self.callback_ocr()
             
             if key==27: # ESC

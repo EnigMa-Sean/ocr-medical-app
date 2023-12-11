@@ -5,6 +5,7 @@ from pdf2image import convert_from_path
 import threading
 import numpy as np
 import cv2
+import os
 
 from ocr_med.roi_label import crop_with_tkinter as cwt
 from ocr_med.json_functions.file_functions import FileFunctions
@@ -12,7 +13,7 @@ from ocr_med.ocr import run_ocr
 
 def initiate_ocr():
     image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
-
+    file_name = os.path.split(folder_path)[-1]
     # Check if the folder path and Excel name are provided
     if not folder_path or not output_path:
         show_error("Please enter both folder path and Excel file name.")
@@ -25,7 +26,7 @@ def initiate_ocr():
 
         except Exception as e:
             show_error(f"Error during OCR process: {str(e)}")
-    result_ocr = run_ocr(image, template_path)
+    result_ocr = run_ocr(image, template_path, file_name)
     FileFunctions.export_json_csv(result_ocr, output_path)
 
 
