@@ -158,10 +158,10 @@ def convert_pdf_to_images(pdf_path):
         return None
 
 def show_success(message):
-    error_label.config(text=message, fg="green")
+    error_label.config(text=message, fg="green", font=("Helvetica", 9))
 
 def show_error(message):
-    error_label.config(text=message, fg="red")
+    error_label.config(text=message, fg="red", font=("Helvetica", 9))
 
 def update_folder_label(folder_path):
     folder_label.config(text=f"Selected: {folder_path}")
