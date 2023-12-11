@@ -198,13 +198,41 @@ def call_all_value_and_change_to_image():
             image = np.array(pdf_images[page_index])
     return image, folder_path, output_path, template_path, file_type_var, page_number
 
+def on_configure(event):
+    # Adjust font and widget sizes when the window is resized
+    new_width = event.width
+    new_height = event.height
+
+    # Calculate the center position based on the new window dimensions
+    center_x = new_width // 2
+    center_y = new_height // 2
+
+    # Move the main frame to the center
+    window.grid_rowconfigure(0, weight=1)
+    window.grid_columnconfigure(0, weight=1)
+    main_frame.place(x=center_x, y=center_y, anchor="center")
+
+def on_configure(event):
+    # Adjust font and widget sizes when the window is resized
+    new_width = event.width
+    new_height = event.height
+
+    # Calculate the center position based on the new window dimensions
+    center_x = new_width // 2
+    center_y = new_height // 2
+
+    # Move the main frame to the center
+    window.grid_rowconfigure(0, weight=1)
+    window.grid_columnconfigure(0, weight=1)
+    main_frame.place(x=center_x, y=center_y, anchor="center")
+    
 # Create the main window with higher DPI
 window = tk.Tk()
 window.title("OCR Application")
 window.geometry("960x540")  # Set the initial window size
 
 # Set DPI (dots per inch) to improve appearance
-window.tk.call('tk', 'scaling', 1.5)
+window.tk.call('tk', 'scaling', 1.75)
 
 # Define modern color scheme
 background_color = "#F5F5F5"
@@ -219,7 +247,7 @@ style = ttk.Style()
 style.configure("main.TFrame", background=background_color)
 
 # Create and pack a main frame
-main_frame = ttk.Frame(window, padding="20")
+main_frame = ttk.Frame(window, padding="20", style="main.TFrame")
 main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
 # Configure row and column weights for expansion
@@ -347,6 +375,8 @@ initiate_ocr_button.grid(row=13, column=1, pady=5, sticky=tk.W)
 # Error label
 error_label = tk.Label(left_frame, text="Log return: Nothing", font=label_font, bg=background_color, fg=text_color)
 error_label.grid(row=14, column=0, columnspan=2, pady=5, sticky=tk.W)
+
+window.bind("<Configure>", on_configure)
 
 # Start the Tkinter event loop
 window.mainloop()
