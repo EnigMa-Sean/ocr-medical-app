@@ -10,11 +10,7 @@ from ocr_med.roi_label import crop_with_tkinter as cwt
 from ocr_med.json_functions.file_functions import FileFunctions
 
 def initiate_ocr():
-    folder_path = folder_path_entry.get()   #return type of file_path is string
-    output_path = excel_name_entry.get()    #return type of output_path is string
-    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
-    #For multiple pages pdf
-    page_number = page_number_entry.get()
+    image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
 
     # Check if the folder path and Excel name are provided
     if not folder_path or not output_path:
@@ -39,40 +35,13 @@ def initiate_ocr():
 #     # Add Jean label(or what ever u like to call) function here, and if want to change button name find this line
 #     # label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
 #     # and change text="Start Label" to text="What ever u like to call"
- 
-#     print("Label Function Called")
-
-def create_template_window():
-    template_window = tk.Toplevel(window)
-    template_window.title("Create Template")
-    template_window.geometry("465x330")
-
-    # Buttons and Entry widgets in a grid layout
-    loadtemplate_label = tk.Label(template_window, text="Load Existing Template", font=("Helvetica", 10), bg=background_color, fg=text_color)
-    loadtemplate_label.grid(row=0, column=2, padx=10, pady=10)
-
-    template_path_entry = tk.Entry(template_window, width=40, font=("Helvetica", 10))
-    template_path_entry.grid(row=1, column=2, padx=10, pady=10)
-
-    browse_template_button = tk.Button(template_window, text="Browse", command=lambda: browse_template_path(template_path_entry), width=20)
-    browse_template_button.grid(row=2, column=2, padx=5, pady=10)
-
-    createnewtemplate_label = tk.Label(template_window, text="Create New Template", font=("Helvetica", 10), bg=background_color, fg=text_color)
-    createnewtemplate_label.grid(row=3, column=2, padx=10, pady=10)
-
-    header_button = tk.Button(template_window, text="Create New Template", command=lambda: crop_with_tkinter(), width=20)
-    header_button.grid(row=4, column=2, padx=10, pady=10)
-
 
 def label_function_example(label_type):
-    folder_path = folder_path_entry.get()   #return type of file_path is string
-    output_path = excel_name_entry.get()    #return type of output_path is string
-    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
-    # For multiple pages pdf
-    page_number = page_number_entry.get()
+    image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
     
 def crop_with_tkinter():
-    image, folder_path, output_path, file_type_var, page_number = call_all_value_and_change_to_image()
+    image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
+    
     root = tk.Tk()
     app = cwt.ImageCropper(root, image)
     file_functions = FileFunctions()
@@ -91,11 +60,6 @@ def browse_template_path(template_entry):
     template_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
     template_entry.delete(0, tk.END)
     template_entry.insert(0, template_path)
-
-#call to get template path
-def get_template_path():
-    template_path = browse_template_path.template_path_entry.get()
-    return template_path
 
 def browse_folder_path():
     folder_path = filedialog.askopenfilename(filetypes=[("Folder", "")])
@@ -207,6 +171,7 @@ def call_all_value_and_change_to_image():
     folder_path = folder_path_entry.get()   #return type of file_path is string
     output_path = excel_name_entry.get()    #return type of output_path is string
     file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
+    template_path = template_path_entry.get() #return type of template_path is string
     # For multiple pages pdf
     page_number = page_number_entry.get()
 
@@ -219,7 +184,7 @@ def call_all_value_and_change_to_image():
         page_index = int(page_number) - 1  # Convert to zero-based index
         if 0 <= page_index < len(pdf_images):
             image = np.array(pdf_images[page_index])
-    return image, folder_path, output_path, file_type_var, page_number
+    return image, folder_path, output_path, template_path, file_type_var, page_number
 
 
 # Create the main window with higher DPI 
@@ -327,9 +292,17 @@ display_file_button = tk.Button(left_frame, text="Preview Selected File", comman
 display_file_button.pack(pady=5)
 display_file_button.config(command=display_selected_file)
 
-# Create a button for the "Create Template" function
-create_template_button = tk.Button(left_frame, text="Template", command=create_template_window, bg=accent_color, fg="white", font=button_font, width=20)
-create_template_button.pack(pady=5)
+# Buttons and Entry widgets in a grid layout
+
+template_path_entry = tk.Entry(left_frame, width=40, font=("Helvetica", 10))
+template_path_entry.pack(pady=5)
+
+browse_template_button = tk.Button(left_frame, text="Browse Existed Template", command=lambda: browse_template_path(template_path_entry), bg=accent_color, fg="white", font=button_font, width=20)
+browse_template_button.pack(pady=5)
+
+
+header_button = tk.Button(left_frame, text="Create New Template", command=lambda: crop_with_tkinter(), bg=accent_color, fg="white", font=button_font, width=20)
+header_button.pack(pady=5)
 
 # Create a button for the label function
 #label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
