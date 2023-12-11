@@ -29,23 +29,23 @@ def initiate_ocr():
         except Exception as e:
             show_error(f"Error during OCR process: {str(e)}")
 
-def label_function():
-    folder_path = folder_path_entry.get()   #return type of file_path is string
-    output_path = excel_name_entry.get()    #return type of output_path is string
-    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
-    #For multiple pages pdf
-    page_number = page_number_entry.get()
+# def label_function():
+#     folder_path = folder_path_entry.get()   #return type of file_path is string
+#     output_path = excel_name_entry.get()    #return type of output_path is string
+#     file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
+#     #For multiple pages pdf
+#     page_number = page_number_entry.get()
 
-    # Add Jean label(or what ever u like to call) function here, and if want to change button name find this line
-    # label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
-    # and change text="Start Label" to text="What ever u like to call"
+#     # Add Jean label(or what ever u like to call) function here, and if want to change button name find this line
+#     # label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
+#     # and change text="Start Label" to text="What ever u like to call"
  
-    print("Label Function Called")
+#     print("Label Function Called")
 
 def create_template_window():
     template_window = tk.Toplevel(window)
     template_window.title("Create Template")
-    template_window.geometry("480x330")
+    template_window.geometry("465x330")
 
     # Buttons and Entry widgets in a grid layout
     loadtemplate_label = tk.Label(template_window, text="Load Existing Template", font=("Helvetica", 10), bg=background_color, fg=text_color)
@@ -72,22 +72,7 @@ def label_function_example(label_type):
     page_number = page_number_entry.get()
     
 def crop_with_tkinter():
-    folder_path = folder_path_entry.get()   #return type of file_path is string
-    output_path = excel_name_entry.get()    #return type of output_path is string
-    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
-    # For multiple pages pdf
-    page_number = page_number_entry.get()
-
-    if file_type_var == "Image":
-        # For image files
-        image = cv2.imread(folder_path)
-    elif file_type_var == "PDF":
-        # For PDF files
-        pdf_images = convert_pdf_to_images(folder_path)
-        page_index = int(page_number) - 1  # Convert to zero-based index
-        if 0 <= page_index < len(pdf_images):
-            image = np.array(pdf_images[page_index])
-
+    image, folder_path, output_path, file_type_var, page_number = call_all_value_and_change_to_image()
     root = tk.Tk()
     app = cwt.ImageCropper(root, image)
     file_functions = FileFunctions()
@@ -218,6 +203,24 @@ def toggle_orientation():
     # Update the display_file function to consider the current orientation when displaying the file
     display_file(folder_path_entry.get(), int(page_number_entry.get()))
 
+def call_all_value_and_change_to_image():
+    folder_path = folder_path_entry.get()   #return type of file_path is string
+    output_path = excel_name_entry.get()    #return type of output_path is string
+    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
+    # For multiple pages pdf
+    page_number = page_number_entry.get()
+
+    if file_type_var == "Image":
+        # For image files
+        image = cv2.imread(folder_path)
+    elif file_type_var == "PDF":
+        # For PDF files
+        pdf_images = convert_pdf_to_images(folder_path)
+        page_index = int(page_number) - 1  # Convert to zero-based index
+        if 0 <= page_index < len(pdf_images):
+            image = np.array(pdf_images[page_index])
+    return image, folder_path, output_path, file_type_var, page_number
+
 
 # Create the main window with higher DPI 
 window = tk.Tk()
@@ -329,8 +332,8 @@ create_template_button = tk.Button(left_frame, text="Template", command=create_t
 create_template_button.pack(pady=5)
 
 # Create a button for the label function
-label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
-label_button.pack(pady=5)
+#label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
+#label_button.pack(pady=5)
 
 # Create a button for the ocr function
 ocr_button = tk.Button(left_frame, text="Initiate OCR", command=initiate_ocr, bg=accent_color, fg="white", font=button_font, width=20)
