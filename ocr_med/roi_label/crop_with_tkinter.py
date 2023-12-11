@@ -1,20 +1,19 @@
 from tkinter import * 
 import tkinter as tk
 from tkinter import ttk, messagebox
-from tkinter.messagebox import askyesno 
+#from tkinter.messagebox import askyesno 
 
 import cv2
 from PIL import Image, ImageTk
 import os
 import pytesseract
 from pathlib import Path
-import re
 import sys
-
 import threading
 from ocr_med.json_functions.file_functions import FileFunctions
+import re
 
-pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
 
 class ImageCropper:
     def __init__(self, image):
@@ -25,19 +24,20 @@ class ImageCropper:
         self.tkInter.title("Label interface")
         self.tkInter.geometry("350x150") 
         self.style = ttk.Style()
-
+        
         self.input_text = StringVar() 
         self.ocr_text = StringVar()
 
-        self.plot_roi_coordinates:StringVar = []
-        self.roi_coordinates:StringVar = []
-        self.ocr_value:StringVar = []
-        self.image_roi:StringVar = []
+        self.plot_roi_coordinates: StringVar = []
+        self.roi_coordinates: StringVar = []
+        self.ocr_value: StringVar = []
+        self.image_roi: StringVar = []
 
         self.get_value = False
         self.exitFlag = False
         self.buttonState = None
         
+        # Text box and enter button
         self.style.configure('TEntry', foreground='black') 
         self.user_input = ttk.Entry(self.tkInter, textvariable=self.input_text, justify=CENTER, font=("Helvetica", 10, 'bold'))    
         self.user_input.focus_force() 
@@ -69,18 +69,7 @@ class ImageCropper:
         
         self.file_functions = FileFunctions()
 
-    def change_state(self, new_state):
-        self.buttonState = new_state
-
-    def callback_enter(self):
-        self.get_value = True
-
-    def set_get_value_flag(self, value):
-        self.get_value = value
-
-    def button_state(self):
-        return self.buttonState
-    
+ 
     def show_success(self, message):
         self.status_label.config(text=message, fg="green")
 
@@ -102,6 +91,9 @@ class ImageCropper:
             self.show_success("Value Mode")
         else:
             self.show_success("Press Botton for Label")
+
+    def callback_enter(self):
+        self.get_value = True
 
     @property
     def get_button_state(self):
@@ -125,7 +117,7 @@ class ImageCropper:
     
     @property
     def get_roi_coordinate(self):
-        return self.roi_coordinates
+        return self.get_roi_coordinate
     
     def set_get_value_flag(self, value):
         self.get_value = value
@@ -141,39 +133,7 @@ class ImageCropper:
     
             # Drawing a rectangle around the region of interest (roi)
             cv2.rectangle(image, self.roi_coordinates[0], self.roi_coordinates[1], (0,255,255), 2) 
-            cv2.imshow("Image", image) 
-
-
-    def crop_image(self):
-        # Function to capture ROI based on the current state
-        image_copy = self.image.copy()
-        cv2.namedWindow("Image", cv2.WINDOW_GUI_EXPANDED) 
-        # cv2.setMouseCallback("Image", self.shape_selection) 
-        cv2.setMouseCallback("Image", self.scroll_zoom)
-
-        while True: 
-        # display the image and wait for a keypress 
-            cv2.imshow("Image", self.new_image) 
-            key = cv2.waitKey(1) & 0xFF
-
-            if key==13: # If 'enter' is pressed, apply OCR
-                if len(self.roi_coordinates) == 2:
-                    self.image_roi = image_copy[self.roi_coordinates[0][1]:self.roi_coordinates[1][1], 
-                                        self.roi_coordinates[0][0]:self.roi_coordinates[1][0]]
-                    self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 4')
-                    self.ocr_text = re.sub(r'\n', '', self.ocr_text)
-                    print(self.ocr_text)
-                    self.get_value = True
-            
-            if key==27: # ESC
-                print(file_functions.base_dict)
-                file_functions.save_template_json()
-                break
-            
-            if key == ord("c"): # Clear the selection when 'c' is pressed 
-                self.new_image = image_copy.copy() 
-
-        cv2.destroyAllWindows()
+            cv2.imshow("Imported Image", image) 
 
     def scroll_zoom(self, event, x, y, flags, param):
         if event == cv2.EVENT_MOUSEWHEEL:
@@ -220,7 +180,18 @@ class ImageCropper:
             # print(self.roi_coordinates)
 
             cv2.rectangle(self.new_image, self.plot_roi_coordinates[0], self.plot_roi_coordinates[1], (0,255,255), 2) 
-            cv2.imshow("Image", self.new_image) 
+            cv2.imshow("Imported Image", self.new_image) 
+                
+    def crop_image(self):
+        # Function to capture ROI based on the current state
+        image_copy = self.image.copy()
+        cv2.namedWindow("Imported Image", cv2.WINDOW_GUI_EXPANDED) 
+        cv2.setMouseCallback("Imported Image", self.scroll_zoom) 
+        
+        while True: 
+        # Display the image and wait for a keypress 
+            cv2.imshow("Imported Image", self.new_image) 
+            key = cv2.waitKey(1) & 0xFF
 
     def main(self):
         while True:
@@ -262,6 +233,7 @@ class ImageCropper:
             except Exception as e:
                 self.show_error(f"An error occurred: {e}, Please try again.")
 
+       
 def main():
     while True:
         try:
@@ -301,7 +273,8 @@ def main():
                 sys.exit(0)
         except Exception as e:
             label_functions.show_error(f"An error occurred: {e}, Please try again.")
-    
+
+        
 
 if __name__ == "__main__":
     ROOT_PATH :str = Path(__file__).parents[2]
@@ -322,4 +295,7 @@ if __name__ == "__main__":
     main_thread.start()
 
     label_functions.tkInter.mainloop()
+    
+    
+    
     
