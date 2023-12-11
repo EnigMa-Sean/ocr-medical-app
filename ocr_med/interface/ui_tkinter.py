@@ -230,7 +230,7 @@ window.title("OCR Application")
 window.geometry("960x540")  # Set the initial window size
 
 # Set DPI (dots per inch) to improve appearance
-window.tk.call('tk', 'scaling', 1.75)
+window.tk.call('tk', 'scaling', 1.6)
 
 # Define modern color scheme
 background_color = "#F5F5F5"
@@ -371,7 +371,7 @@ initiate_ocr_button.grid(row=13, column=1, pady=5, sticky=tk.W)
 
 # Row 13
 # Error label
-error_label = tk.Label(left_frame, text="Log return: Nothing", font=label_font, bg=background_color, fg=text_color)
+error_label = tk.Label(left_frame, text="Status Log: Nothing", font=label_font, bg=background_color, fg=text_color)
 error_label.grid(row=14, column=0, columnspan=2, pady=5, sticky=tk.W)
 
 window.bind("<Configure>", on_configure)
