@@ -36,6 +36,7 @@ class ImageCropper:
         self.get_value_text = False
         self.get_value_ocr = False
         self.exitFlag = False
+        self.previous_value_exist = True
         self.buttonState = None
         
         # Text box and enter button
@@ -252,10 +253,15 @@ class ImageCropper:
                         if file_functions.base_dict[file_functions.latest_region]['title'] == None:
                             self.show_error("Please add a title before adding a header")
                             print(file_functions.base_dict)
-                        else:
+                        if not self.previous_value_exist:
+                            self.show_error("Please add a value in previous key before adding a new key")
+                            print(file_functions.base_dict)
+                        else: 
+                            self.previous_value_exist = False
                             file_functions.add_key(self.get_input_text.get())
                             self.show_success("Successfully add key by typing")
                             print(file_functions.base_dict)
+                            
                     elif self.get_button_state == 4:
                         self.show_error("Please crop from the image to get the value")
                         print(file_functions.base_dict)
@@ -276,7 +282,11 @@ class ImageCropper:
                         if file_functions.base_dict[file_functions.latest_region]['title'] == None:
                             self.show_error("Please add a title before adding a header")
                             print(file_functions.base_dict)
+                        if not self.previous_value_exist:
+                            self.show_error("Please add a value in previous key before adding a new key")
+                            print(file_functions.base_dict)
                         else:
+                            self.previous_value_exist = False
                             file_functions.add_key(self.get_ocr_text)
                             self.show_success("Successfully add key by OCR croping")
                             print(file_functions.base_dict)
@@ -285,6 +295,7 @@ class ImageCropper:
                             self.show_error("Please add a title before adding a header")
                             print(file_functions.base_dict)
                         else:
+                            self.previous_value_exist = True
                             file_functions.add_value(self.get_roi_coordinate)
                             self.show_success("Successfully add value by OCR croping")
                             print(file_functions.base_dict)
