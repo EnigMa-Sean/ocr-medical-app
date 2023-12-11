@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 import os
 import pytesseract
 from pathlib import Path
+import re
 
 import threading
 from ocr_med.json_functions.file_functions import FileFunctions
@@ -18,10 +19,12 @@ class ImageCropper:
     def __init__(self, root, image):
         self.root = root
         self.image = image
+        self.new_image = image
 
         self.input_text = StringVar() 
         self.ocr_text = StringVar()
 
+        self.plot_roi_coordinates:StringVar = []
         self.roi_coordinates:StringVar = []
         self.ocr_value:StringVar = []
         self.image_roi:StringVar = []
@@ -47,6 +50,13 @@ class ImageCropper:
         self.button_title.pack(side=tk.LEFT, padx=5)
         self.button_header.pack(side=tk.LEFT, padx=5)
         self.button_value.pack(side=tk.LEFT, padx=5)
+
+        #zoom and scroll
+        self.zoom = 1
+        self.min_zoom = 1
+        self.max_zoom = 5
+        self.x_offset = 0
+        self.y_offset = 0
 
     def change_state(self, new_state):
         self.buttonState = new_state
@@ -78,18 +88,19 @@ class ImageCropper:
     
             # Drawing a rectangle around the region of interest (roi)
             cv2.rectangle(image, self.roi_coordinates[0], self.roi_coordinates[1], (0,255,255), 2) 
-            cv2.imshow("Imported Image", image) 
+            cv2.imshow("Image", image) 
 
 
     def crop_image(self):
         # Function to capture ROI based on the current state
         image_copy = self.image.copy()
-        cv2.namedWindow("Imported Image") 
-        cv2.setMouseCallback("Imported Image", self.shape_selection) 
+        cv2.namedWindow("Image", cv2.WINDOW_GUI_EXPANDED) 
+        # cv2.setMouseCallback("Image", self.shape_selection) 
+        cv2.setMouseCallback("Image", self.scroll_zoom)
 
         while True: 
         # display the image and wait for a keypress 
-            cv2.imshow("Imported Image", self.image) 
+            cv2.imshow("Image", self.new_image) 
             key = cv2.waitKey(1) & 0xFF
 
             if key==13: # If 'enter' is pressed, apply OCR
@@ -97,19 +108,67 @@ class ImageCropper:
                     self.image_roi = image_copy[self.roi_coordinates[0][1]:self.roi_coordinates[1][1], 
                                         self.roi_coordinates[0][0]:self.roi_coordinates[1][0]]
                     self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 4')
+                    self.ocr_text = re.sub(r'\n', '', self.ocr_text)
+                    print(self.ocr_text)
                     self.get_value = True
             
             if key==27: # ESC
                 print(file_functions.base_dict)
                 file_functions.save_template_json()
-                file_functions.export_json_csv(file_functions.base_dict['template_name'])
                 break
             
             if key == ord("c"): # Clear the selection when 'c' is pressed 
-                self.image = image_copy.copy() 
+                self.new_image = image_copy.copy() 
 
         cv2.destroyAllWindows()
 
+    def scroll_zoom(self, event, x, y, flags, param):
+        if event == cv2.EVENT_MOUSEWHEEL:
+            if flags > 0:
+                self.zoom *= 1.1
+                self.zoom = min(self.zoom, self.max_zoom)
+            else:
+                self.zoom /= 1.1
+                self.zoom = max(self.zoom, self.min_zoom)
+            img = self.image.copy()
+
+            new_width = round(img.shape[1] / self.zoom)
+            new_height = round(img.shape[0] / self.zoom)
+            self.x_offset = round(x - (x / self.zoom))
+            self.y_offset = round(y - (y / self.zoom))
+            img = img[
+                self.y_offset : self.y_offset + new_height,
+                self.x_offset : self.x_offset + new_width,]
+            self.new_image = cv2.resize(img, (self.image.shape[1], self.image.shape[0]))
+
+        if event == cv2.EVENT_LBUTTONDOWN: 
+            self.plot_roi_coordinates = [(x, y)]
+            if self.zoom > 1:
+                origin_x = round((x / self.zoom) + self.x_offset)
+                origin_y = round((y / self.zoom) + self.y_offset)
+                self.origin_roi_coordinates = [(origin_x, origin_y)]
+            else:
+                origin_x = x
+                origin_y = y
+            self.roi_coordinates = [(origin_x, origin_y)] 
+    
+        # Storing the (x2,y2) coordinates when the left mouse button is released and make a rectangle on the selected region
+        elif event == cv2.EVENT_LBUTTONUP: 
+            self.plot_roi_coordinates.append((x, y))
+            if self.zoom > 1:
+                origin_x = round((x / self.zoom) + self.x_offset)
+                origin_y = round((y / self.zoom) + self.y_offset)
+            else:
+                origin_x = x
+                origin_y = y
+            self.roi_coordinates.append((origin_x, origin_y)) 
+    
+            # Drawing a rectangle around the region of interest (roi)
+            # print(self.roi_coordinates)
+
+            cv2.rectangle(self.new_image, self.plot_roi_coordinates[0], self.plot_roi_coordinates[1], (0,255,255), 2) 
+            cv2.imshow("Image", self.new_image) 
+                
 
 def add_value_to_json():
     while True:
@@ -140,6 +199,7 @@ if __name__ == "__main__":
 
     file_name = 'GCA RE'
     input_img = cv2.imread(os.path.join(JPG_LOCATION, file_name+'.jpg')) 
+    # input_img = cv2.resize(input_img, (675, 826))
     image = input_img 
 
     root = tk.Tk()

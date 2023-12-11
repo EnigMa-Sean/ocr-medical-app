@@ -30,5 +30,5 @@ def run_ocr(image, template_name):
 
 if __name__ == "__main__":
     image = cv2.imread(os.path.join(ROOT_PATH, 'data\jpg\GCA RE.jpg'))
-    template_name = 'JEAN'
+    template_name = 'None'
     print(run_ocr(image, template_name))
