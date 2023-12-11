@@ -13,7 +13,7 @@ import threading
 from ocr_med.json_functions.file_functions import FileFunctions
 import re
 
-#pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
 
 class ImageCropper:
     def __init__(self, image):
@@ -22,7 +22,7 @@ class ImageCropper:
 
         self.tkInter = tk.Tk()
         self.tkInter.title("Label interface")
-        self.tkInter.geometry("350x150") 
+        self.tkInter.geometry("450x150") 
         self.style = ttk.Style()
         
         self.input_text = StringVar() 
@@ -33,7 +33,8 @@ class ImageCropper:
         self.ocr_value: StringVar = []
         self.image_roi: StringVar = []
 
-        self.get_value = False
+        self.get_value_text = False
+        self.get_value_ocr = False
         self.exitFlag = False
         self.buttonState = None
         
@@ -51,14 +52,16 @@ class ImageCropper:
         self.button_title = ttk.Button(self.tkInter, text="Title", command=lambda: self.change_state(2))
         self.button_key = ttk.Button(self.tkInter, text="Key", command=lambda: self.change_state(3))
         self.button_value = ttk.Button(self.tkInter, text="Value", command=lambda: self.change_state(4))
+        self.button_save = ttk.Button(self.tkInter, text="Save", command=lambda: self.save_template_json())
         self.button_template.grid(row=1, column=0)
         self.button_title.grid(row=1, column=1, padx=5, pady=10)
         self.button_key.grid(row=1, column=2, padx=5, pady=10)
         self.button_value.grid(row=1, column=3, padx=5, pady=10)
+        self.button_save.grid(row=2, column=3, padx=5, pady=10)
 
         # Label for status text at the bottom
         self.status_label = tk.Label(self.tkInter, text="", font=("Helvetica", 10), anchor=CENTER, padx=5, pady=10)
-        self.status_label.grid(row=2, column=0, columnspan=4, pady=10)
+        self.status_label.grid(row=2, column=0, columnspan=3, pady=10)
 
         #zoom and scroll
         self.zoom = 1
@@ -69,7 +72,10 @@ class ImageCropper:
         
         self.file_functions = FileFunctions()
 
- 
+    def save_template_json(self):
+        file_functions.save_template_json()
+        #file_functions.export_json_csv(file_functions.base_dict['template_name'])
+
     def show_success(self, message):
         self.status_label.config(text=message, fg="green")
 
@@ -86,14 +92,17 @@ class ImageCropper:
         elif new_state == 2:
             self.show_success("Title Mode")
         elif new_state == 3:
-            self.show_success("Header Mode")
+            self.show_success("Key Mode")
         elif new_state == 4:
             self.show_success("Value Mode")
         else:
             self.show_success("Press Botton for Label")
 
     def callback_enter(self):
-        self.get_value = True
+        self.get_value_text = True
+
+    def callback_ocr(self):
+        self.get_value_ocr = True
 
     @property
     def get_button_state(self):
@@ -104,8 +113,12 @@ class ImageCropper:
         return self.exitFlag
     
     @property
-    def get_value_flag(self):
-        return self.get_value
+    def get_value_text_flag(self):
+        return self.get_value_text
+    
+    @property
+    def get_value_ocr_flag(self):
+        return self.get_value_ocr
     
     @property
     def get_input_text(self):
@@ -113,14 +126,20 @@ class ImageCropper:
     
     @property
     def get_ocr_text(self):
-        return self.get_ocr_text
+        return self.ocr_text
     
     @property
     def get_roi_coordinate(self):
-        return self.get_roi_coordinate
+        return self.roi_coordinates
     
-    def set_get_value_flag(self, value):
-        self.get_value = value
+    def reset_input_text(self):
+        self.input_text = StringVar()
+    
+    def reset_get_value_text_flag(self):
+        self.get_value_text = False
+
+    def reset_get_value_ocr_flag(self):
+        self.get_value_ocr = False
 
     def shape_selection(self, event, x, y, flags, param): 
         # Storing the (x1,y1) coordinates when left mouse button is pressed  
@@ -193,6 +212,25 @@ class ImageCropper:
             cv2.imshow("Imported Image", self.new_image) 
             key = cv2.waitKey(1) & 0xFF
 
+            if key==13: # If 'enter' is pressed, apply OCR
+                if len(self.roi_coordinates) == 2:
+                    self.image_roi = image_copy[self.roi_coordinates[0][1]:self.roi_coordinates[1][1], 
+                                        self.roi_coordinates[0][0]:self.roi_coordinates[1][0]]
+                    self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 4')
+                    self.ocr_text = re.sub(r'\n', '', self.ocr_text)
+                    print(self.ocr_text)
+                    self.callback_ocr()
+            
+            if key==27: # ESC
+                print("Exiting")
+                print(file_functions.base_dict)
+                cv2.destroyAllWindows()
+                self.exitFlag = True
+                sys.exit(0)
+            
+            if key == ord("c"): # Clear the selection when 'c' is pressed 
+                self.new_image = image_copy.copy() 
+                
     def main(self):
         while True:
             try:
@@ -237,40 +275,66 @@ class ImageCropper:
 def main():
     while True:
         try:
-            if label_functions.get_value_flag:
+            if label_functions.get_value_text_flag:
                 if label_functions.get_button_state == 1:
-                    if label_functions.get_input_text.get():
-                        file_functions.base_dict['template_name'] = label_functions.get_input_text.get()
-                        label_functions.show_success("Add template name by typing")
-                    else: 
-                        label_functions.show_error("Please identify template name by typing")
+                    file_functions.base_dict['template_name'] = label_functions.get_input_text.get()
+                    label_functions.show_success("Add template name by typing")
+                    print(file_functions.base_dict)
                 elif label_functions.get_button_state == 2:
                     file_functions.add_region()
-                    if label_functions.get_input_text.get():
-                        file_functions.add_title(label_functions.get_input_text.get())
-                        label_functions.show_success("Successfully add title by typing")
-                    else:
-                        file_functions.add_title(label_functions.get_ocr_text)
-                        label_functions.show_success("Successfully add title by OCR croping")
+                    file_functions.add_title(label_functions.get_input_text.get())
+                    label_functions.show_success("Successfully add title by typing")
+                    print(file_functions.base_dict)
                 elif label_functions.get_button_state == 3:
                     if file_functions.base_dict[file_functions.latest_region]['title'] == None:
                         label_functions.show_error("Please add a title before adding a header")
+                        print(file_functions.base_dict)
                     else:
-                        if label_functions.get_input_text.get():
-                            file_functions.add_key(label_functions.get_input_text.get())
-                            label_functions.show_success("Successfully add key by typing")
-                        else:
-                            file_functions.add_key(label_functions.get_ocr_text)
-                            label_functions.show_success("Successfully add key by OCR croping")
+                        file_functions.add_key(label_functions.get_input_text.get())
+                        label_functions.show_success("Successfully add key by typing")
+                        print(file_functions.base_dict)
                 elif label_functions.get_button_state == 4:
-                    if label_functions.get_input_text.get():
-                        label_functions.show_error("Please crop from the image to get the value")
+                    label_functions.show_error("Please crop from the image to get the value")
+                    print(file_functions.base_dict)
+                else:   
+                    label_functions.show_error("Please select a mode")
+                    print(file_functions.base_dict)
+                label_functions.reset_get_value_text_flag()
+
+
+            elif label_functions.get_value_ocr_flag:
+                if label_functions.get_button_state == 1:
+                    label_functions.show_error("Please identify template name by typing")
+                    print(file_functions.base_dict)
+                elif label_functions.get_button_state == 2:
+                    label_functions.show_error("Please identify title name by typing")
+                    print(file_functions.base_dict)
+                elif label_functions.get_button_state == 3:
+                    if file_functions.base_dict[file_functions.latest_region]['title'] == None:
+                        label_functions.show_error("Please add a title before adding a header")
+                        print(file_functions.base_dict)
+                    else:
+                        file_functions.add_key(label_functions.get_ocr_text)
+                        label_functions.show_success("Successfully add key by OCR croping")
+                        print(file_functions.base_dict)
+                elif label_functions.get_button_state == 4:
+                    if file_functions.base_dict[file_functions.latest_region]['title'] == None:
+                        label_functions.show_error("Please add a title before adding a header")
+                        print(file_functions.base_dict)
                     else:
                         file_functions.add_value(label_functions.get_roi_coordinate)
-                        label_functions.show_success("Successfully add ROI coordinates as value")
-                label_functions.set_get_value_flag(False)
+                        label_functions.show_success("Successfully add value by OCR croping")
+                        print(file_functions.base_dict)
+                else: 
+                    label_functions.show_error("Please select a mode")
+                    print(file_functions.base_dict)
+                label_functions.reset_get_value_ocr_flag()
+                    
+            
             if label_functions.get_exit_flag:
                 sys.exit(0)
+
+
         except Exception as e:
             label_functions.show_error(f"An error occurred: {e}, Please try again.")
 
