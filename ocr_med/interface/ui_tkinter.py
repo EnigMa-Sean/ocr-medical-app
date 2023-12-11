@@ -20,7 +20,7 @@ def initiate_ocr():
         try:
             # Add Yun OCR Code here
             #print(f"OCR initiated for Folder: {folder_path}, Excel File: {excel_name}")
-            success_message = f"OCR is finished and saved at {output_path}"  # Replace output_path with the actual path
+            success_message = f"OCR is finished and saved at {output_path}" # Replace output_path with the actual path
             show_success(success_message)
 
         except Exception as e:
@@ -65,7 +65,7 @@ def browse_template_path(template_entry):
     template_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
     template_entry.delete(0, tk.END)
     template_entry.insert(0, template_path)
-    return template_path
+    update_template_label(template_path)
 
 def browse_folder_path():
     folder_path = filedialog.askopenfilename(filetypes=[("Folder", "")])
@@ -147,6 +147,10 @@ def update_excel_label(output_path):
     last_two_dirs = "/".join(output_path.split("/")[-2:])
     excel_label.config(text=f"Selected: {last_two_dirs}")
 
+def update_template_label(template_path):
+    last_two_dirs = "/".join(template_path.split("/")[-2:])
+    template_location_label.config(text=f"Selected: {last_two_dirs}")
+
 def display_selected_file():
     try:
         # Get the selected file path and page number
@@ -194,14 +198,13 @@ def call_all_value_and_change_to_image():
             image = np.array(pdf_images[page_index])
     return image, folder_path, output_path, template_path, file_type_var, page_number
 
-
 # Create the main window with higher DPI
 window = tk.Tk()
 window.title("OCR Application")
-window.geometry("690x540")  # Set the initial window size
+window.geometry("960x540")  # Set the initial window size
 
 # Set DPI (dots per inch) to improve appearance
-window.tk.call('tk', 'scaling', 2.0)
+window.tk.call('tk', 'scaling', 1.5)
 
 # Define modern color scheme
 background_color = "#F5F5F5"
@@ -211,118 +214,139 @@ text_color = "#2c3e50"
 # Configure window background color
 window.configure(bg=background_color)
 
+# Create a style for the main frame
+style = ttk.Style()
+style.configure("main.TFrame", background=background_color)
+
 # Create and pack a main frame
 main_frame = ttk.Frame(window, padding="20")
-main_frame.pack(fill=tk.BOTH, expand=True)
+main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+# Configure row and column weights for expansion
+window.grid_rowconfigure(0, weight=1)
+window.grid_columnconfigure(0, weight=1)
+
+# Create and pack a main frame
+main_frame = ttk.Frame(window, padding="20")
+main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
 # Create and pack left frame for input elements
 left_frame = ttk.Frame(main_frame, padding="10", style="left.TFrame")
-left_frame.pack(side=tk.LEFT, fill=tk.Y, expand=False)
-
-left_frame.grid_propagate(True)  # Prevent the frame from resizing
+left_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
 # Apply a separator between frames
-ttk.Separator(main_frame, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y)
+ttk.Separator(main_frame, orient=tk.VERTICAL).grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=10)
 
 # Create and pack right frame for image display
 right_frame = ttk.Frame(main_frame, padding="10", style="right.TFrame")
-right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+right_frame.grid(row=0, column=2, sticky=(tk.W, tk.E, tk.N, tk.S))
 
 # Apply a modern style to the left frame
 style = ttk.Style()
 style.configure("left.TFrame", background=background_color)
 
+style = ttk.Style()
+style.configure("right.TFrame", background=background_color)
+
 # Create and pack widgets with modern styling for the left frame
-title_font = ("Helvetica", 12, "bold")
-button_font = ("Helvetica", 8)
-label_font = ("Helvetica", 8)
+title_font = ("Helvetica", 16, "bold")
+button_font = ("Helvetica", 12)
+label_font = ("Helvetica", 12)
 
 # Right Frame Configuration
-datapreview_label = tk.Label(right_frame, text="Data Preview", font=button_font, bg=background_color, fg=text_color)
-datapreview_label.pack(pady=10)
+datapreview_label = tk.Label(right_frame, text="Data Preview", font=button_font, bg=background_color, fg=text_color, width=20, anchor=tk.CENTER)
+datapreview_label.grid(row=0, column=0, pady=10)
 
-display_canvas_width = 420
+display_canvas_width = 400
 display_canvas_height = display_canvas_width * 1.414  # A4 ratio
 
-display_canvas = tk.Canvas(right_frame, width=display_canvas_width, height=display_canvas_height, bg=background_color)
-display_canvas.pack(pady=10)
+display_canvas = tk.Canvas(right_frame, width=display_canvas_width, height=display_canvas_height, bg=background_color, highlightthickness=0, relief="ridge")
+display_canvas.grid(row=1, column=0, pady=10)
 
 orientation_button = tk.Button(right_frame, text="Toggle Orientation", command=toggle_orientation, bg=accent_color, fg="white", font=button_font, width=20)
-orientation_button.pack(pady=5)
+orientation_button.grid(row=2, column=0, pady=5)
 
 # Left Frame Configuration
-title_label = tk.Label(left_frame, text="OCR Application", font=label_font, bg=background_color, fg=text_color)
-title_label.pack(pady=10)
+title_label = tk.Label(left_frame, text="OCR Application", font=title_font, bg=background_color, fg=text_color)
+title_label.grid(row=0, column=0, pady=10, sticky=tk.W)
 
-folder_path_label = tk.Label(left_frame, text="1. Select Your file for OCR:", font=label_font, bg=background_color, fg=text_color)
-folder_path_label.pack()
+# Row 1
+folder_path_label = tk.Label(left_frame, text="1. Select Your File for OCR:", font=label_font, bg=background_color, fg=text_color)
+folder_path_label.grid(row=1, column=0, pady=10, sticky=tk.W)
 
-folder_path_entry = tk.Entry(left_frame, width=40, font=("Helvetica", 8))
-folder_path_entry.pack(pady=5)
+folder_path_entry = tk.Entry(left_frame, width=30, font=label_font)
+folder_path_entry.grid(row=2, column=0, pady=5, sticky=tk.W)
 
-browse_button = tk.Button(left_frame, text="Browse", command=browse_folder_path, bg=accent_color, fg="white", font=button_font, width=20)
-browse_button.pack(pady=5)
+browse_button = tk.Button(left_frame, text="Browse", command=browse_folder_path, bg=accent_color, fg="white", font=button_font)
+browse_button.grid(row=2, column=1, pady=5, sticky=tk.W)
 
 folder_label = tk.Label(left_frame, text="Selected File:", font=label_font, bg=background_color, fg=text_color)
-folder_label.pack(pady=5)
+folder_label.grid(row=3, column=0, pady=5, sticky=tk.W)
 
-file_type_label = tk.Label(left_frame, text="2. Select File Type (Image or PDF), For PDF input selected pages below(default is page 1):", font=button_font, bg=background_color, fg=text_color)
-file_type_label.pack()
+# Row 4
+file_type_label = tk.Label(left_frame, text="2. Select File Type (Image or PDF):", font=label_font, bg=background_color, fg=text_color)
+file_type_label.grid(row=4, column=0, pady=10, sticky=tk.W)
+
+file_type_label = tk.Label(left_frame, text="For PDF input selected pages below (default is page 1):", font=label_font, bg=background_color, fg=text_color)
+file_type_label.grid(row=4, column=1, pady=10, sticky=tk.W)
 
 file_type_var = tk.StringVar()
 file_type_var.set("Image")
 
 file_type_menu = tk.OptionMenu(left_frame, file_type_var, "Image", "PDF")
 file_type_menu.config(bg=accent_color, fg="white", font=button_font)
-file_type_menu.pack(pady=5)
+file_type_menu.grid(row=5, column=0, pady=5, sticky=tk.W)
 
-page_number_entry = tk.Entry(left_frame, width=5, font=("Helvetica", 8), justify=tk.CENTER)
-page_number_entry.pack(pady=5)
+
+page_number_entry = tk.Entry(left_frame, width=5, font=label_font, justify=tk.CENTER)
+page_number_entry.grid(row=5, column=1, pady=5, sticky=tk.W)
 page_number_entry.insert(0, "1")  # Set default value to 1
 
-excel_name_label = tk.Label(left_frame, text="3. Select Folder for saving result:", font=label_font, bg=background_color, fg=text_color)
-excel_name_label.pack()
+# Row 6
+excel_name_label = tk.Label(left_frame, text="3. Select Folder for Saving Result:", font=label_font, bg=background_color, fg=text_color)
+excel_name_label.grid(row=6, column=0, pady=10, sticky=tk.W)
 
-excel_name_entry = tk.Entry(left_frame, width=40, font=("Helvetica", 8))
-excel_name_entry.pack(pady=5)
+excel_name_entry = tk.Entry(left_frame, width=30, font=label_font)
+excel_name_entry.grid(row=7, column=0, pady=5, sticky=tk.W)
+
+browse_excel_button = tk.Button(left_frame, text="Browse", command=browse_excel_path, bg=accent_color, fg="white", font=button_font)
+browse_excel_button.grid(row=7, column=1, pady=5, sticky=tk.W)
 
 excel_label = tk.Label(left_frame, text="Selected Folder:", font=label_font, bg=background_color, fg=text_color)
-excel_label.pack(pady=5)
+excel_label.grid(row=8, column=0, pady=5, sticky=tk.W)
 
-browse_excel_button = tk.Button(left_frame, text="Browse", command=browse_excel_path, bg=accent_color, fg="white", font=button_font, width=20)
-browse_excel_button.pack(pady=5)
+# Row 9
+template_label = tk.Label(left_frame, text="4. Select Template or Create New Template", font=label_font, bg=background_color, fg=text_color)
+template_label.grid(row=9, column=0, pady=10, sticky=tk.W)
 
-template_label = tk.Label(left_frame, text="4. Select Template or Create New template", font=label_font, bg=background_color, fg=text_color)
-template_label.pack(pady=5)
+template_path_entry = tk.Entry(left_frame, width=30, font=label_font)
+template_path_entry.grid(row=10, column=0, pady=5, sticky=tk.W)
 
-template_path_entry = tk.Entry(left_frame, width=40, font=("Helvetica", 8))
-template_path_entry.pack(pady=5)
+browse_template_button = tk.Button(left_frame, text="Browse Existed Template", command=lambda: browse_template_path(template_path_entry), bg=accent_color, fg="white", font=button_font)
+browse_template_button.grid(row=10, column=1, pady=5, sticky=tk.W)
 
-browse_template_button = tk.Button(left_frame, text="Browse Existed Template", command=lambda: browse_template_path(template_path_entry), bg=accent_color, fg="white", font=button_font, width=20)
-browse_template_button.pack(pady=5)
+template_location_label = tk.Label(left_frame, text="Selected Template:", font=label_font, bg=background_color, fg=text_color)
+template_location_label.grid(row=11, column=0, pady=5, sticky=tk.W)
 
-header_button = tk.Button(left_frame, text="Create New Template", command=lambda: label_function(), bg=accent_color, fg="white", font=button_font, width=20)
-header_button.pack(pady=5)
+create_template_button = tk.Button(left_frame, text="Create New Template", command=label_function, bg=accent_color, fg="white", font=button_font)
+create_template_button.grid(row=11, column=1, pady=5, sticky=tk.W)
 
-# Menu button
+# Row 11
+# Menu Label
 menu_label = tk.Label(left_frame, text="Menu", font=button_font, bg=background_color, fg=text_color)
-menu_label.pack()
+menu_label.grid(row=12, column=0, pady=10, sticky=tk.W)
 
-# Create a button for the "Display Selected File" function
-display_file_button = tk.Button(left_frame, text="Preview Selected File", command=display_selected_file, bg=accent_color, fg="white", font=button_font, width=20)
-display_file_button.pack(pady=5)
-display_file_button.config(command=display_selected_file)
+# Row 12
+preview_file_button = tk.Button(left_frame, text="Preview Selected File", command=display_selected_file, bg=accent_color, fg="white", font=button_font)
+preview_file_button.grid(row=13, column=0, pady=5, sticky=tk.W)
 
-# Create a button for the OCR function
-ocr_button = tk.Button(left_frame, text="Initiate OCR", command=initiate_ocr, bg=accent_color, fg="white", font=button_font, width=20)
-ocr_button.pack(pady=5)
+initiate_ocr_button = tk.Button(left_frame, text="Initiate OCR", command=initiate_ocr, bg=accent_color, fg="white", font=button_font)
+initiate_ocr_button.grid(row=13, column=1, pady=5, sticky=tk.W)
 
-# Bind the select_file_type function to the Configure event of file_type_menu
-file_type_menu.bind("<Configure>", lambda event: select_file_type())
-
-# Create an error label for displaying error messages
-error_label = tk.Label(left_frame, text="", font=label_font, bg=background_color, fg="red")
-error_label.pack(pady=5)
+# Row 13
+# Error label
+error_label = tk.Label(left_frame, text="Log return: Nothing", font=label_font, bg=background_color, fg=text_color)
+error_label.grid(row=14, column=0, columnspan=2, pady=5, sticky=tk.W)
 
 # Start the Tkinter event loop
 window.mainloop()
