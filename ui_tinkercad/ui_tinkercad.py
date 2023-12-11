@@ -4,22 +4,37 @@ from PIL import Image, ImageTk
 from pdf2image import convert_from_path
 
 def initiate_ocr():
-    folder_path = folder_path_entry.get()
-    excel_name = excel_name_entry.get()
+    folder_path = folder_path_entry.get()   #return type of file_path is string
+    output_path = excel_name_entry.get()    #return type of output_path is string
+    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
+    #For multiple pages pdf
+    page_number = page_number_entry.get()
 
     # Check if the folder path and Excel name are provided
-    if not folder_path or not excel_name:
+    if not folder_path or not output_path:
         show_error("Please enter both folder path and Excel file name.")
     else:
         try:
-            # Perform OCR process here
             # Add Yun OCR Code here
             #print(f"OCR initiated for Folder: {folder_path}, Excel File: {excel_name}")
-            success_message = f"OCR is finished and saved at {excel_name}"  # Replace output_path with the actual path
+            success_message = f"OCR is finished and saved at {output_path}"  # Replace output_path with the actual path
             show_success(success_message)
 
         except Exception as e:
             show_error(f"Error during OCR process: {str(e)}")
+
+def label_function():
+    folder_path = folder_path_entry.get()   #return type of file_path is string
+    output_path = excel_name_entry.get()    #return type of output_path is string
+    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
+    #For multiple pages pdf
+    page_number = page_number_entry.get()
+
+    # Add Jean label(or what ever u like to call) function here, and if want to change button name find this line
+    # label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
+    # and change text="Start Label" to text="What ever u like to call"
+ 
+    print("Label Function Called")
 
 def create_template_window():
     template_window = tk.Toplevel(window)
@@ -50,15 +65,27 @@ def create_template_window():
 
 
 def label_function_example(label_type):
-     print(f"Label Function Called for {label_type}")
+    folder_path = folder_path_entry.get()   #return type of file_path is string
+    output_path = excel_name_entry.get()    #return type of output_path is string
+    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
+    # For multiple pages pdf
+    page_number = page_number_entry.get()
+    
+    # Add Jean template(or what ever u like to call) function here, and if want to change button name find this line
+    # create_template_button = tk.Button(left_frame, text="Template", command=create_template_window, bg=accent_color, fg="white", font=button_font, width=20)
+    # and change text="Template" to text="What ever u like to call"
 
-#Add Save to Template function here (Header, Value, Save) and change in line 30 33 36 
+    print(f"Label Function Called for {label_type}")
+
+# Add Save to Template function here (Header, Value, Save) and change in line 30 33 36 and if u want a path of file, 
+# Output folder, type or pages copy line 68-72
 
 #This is the function for browse button in create template window 
 def browse_template_path(template_entry):
     template_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
     template_entry.delete(0, tk.END)
     template_entry.insert(0, template_path)
+
 #call to get template path
 def get_template_path():
     template_path = browse_template_path.template_path_entry.get()
@@ -74,12 +101,13 @@ def browse_excel_path():
     output_path = filedialog.askdirectory()
     excel_name_entry.delete(0, tk.END)
     excel_name_entry.insert(0, output_path)
-    return output_path
+    update_excel_label(output_path)
+    #return output_path
 
 def select_file_type():
     return file_type_var.get()
 
-def display_file(file_path):
+def display_file(file_path, page_number):
     try:
         file_type = select_file_type()
 
@@ -90,16 +118,30 @@ def display_file(file_path):
             # For PDF files
             pdf_images = convert_pdf_to_images(file_path)
             if pdf_images:
-                image = pdf_images[0]
+                page_index = int(page_number) - 1  # Convert to zero-based index
+                if 0 <= page_index < len(pdf_images):
+                    image = pdf_images[page_index]
+                else:
+                    raise Exception("Invalid page number.")
             else:
                 raise Exception("Error converting PDF to images.")
         else:
             raise Exception("Unsupported file type.")
 
-        # Display the image
-        image = image.resize((500, 705), Image.BILINEAR)
+        # Check the current orientation (landscape or portrait)
+        orientation = current_orientation
+
+        width = 420
+        height = int(display_canvas_width * 1.414)  # A4 ratio
+
+        # Display the image with the current orientation
+        if orientation == "landscape":
+            image = image.resize((height, width), Image.BILINEAR)
+        elif orientation == "portrait":
+            image = image.resize((width, height), Image.BILINEAR)
+
         img = ImageTk.PhotoImage(image)
-        display_canvas.config(width=500, height= 705)
+        display_canvas.config(width=image.width, height=image.height)
         display_canvas.create_image(0, 0, anchor=tk.NW, image=img)
         display_canvas.image = img
         error_label.config(text="")
@@ -123,29 +165,43 @@ def show_error(message):
 
 def update_folder_label(folder_path):
     folder_label.config(text=f"Selected: {folder_path}")
-
-def label_function():
-    # Add Jean label function here
-    print("Label Function Called")
+    
+def update_excel_label(output_path):
+    excel_label.config(text=f"Selected: {output_path}")
 
 def display_selected_file():
     try:
-        # Get the selected file path
-        selected_file_path = folder_path_entry.get()
+        # Get the selected file path and page number
+        selected_file_path, page_number = get_selected_file_info()
 
         # Check if a file path is provided
         if selected_file_path:
-            # Display the selected file
-            display_file(selected_file_path)
+            # Display the selected file with the specified page number
+            display_file(selected_file_path, page_number)
         else:
             show_error("No file path selected.")
     except Exception as e:
         show_error(f"Error displaying selected file: {str(e)}")
 
+def get_selected_file_info():
+    selected_file_path = folder_path_entry.get()
+    page_number = page_number_entry.get()
+    return selected_file_path, page_number
+
+current_orientation = "portrait"
+
+def toggle_orientation():
+    global current_orientation
+    # Toggle between portrait and landscape
+    current_orientation = "landscape" if current_orientation == "portrait" else "portrait"
+    # Update the display_file function to consider the current orientation when displaying the file
+    display_file(folder_path_entry.get(), int(page_number_entry.get()))
+
+
 # Create the main window with higher DPI 
 window = tk.Tk()
 window.title("OCR Application")
-window.geometry("800x300")  # Set the initial window size
+window.geometry("690x540")  # Set the initial window size
 
 # Set DPI (dots per inch) to improve appearance
 window.tk.call('tk', 'scaling', 2.0)
@@ -181,14 +237,20 @@ style.configure("left.TFrame", background=background_color)
 
 # Create and pack widgets with modern styling for the left frame
 title_font = ("Helvetica", 16, "bold")
-button_font = ("Helvetica", 10)
+button_font = ("Helvetica", 9)
 
 #Right Frame configuration
 datapreview_label = tk.Label(right_frame, text="Data Preview", font=button_font, bg=background_color, fg=text_color)
 datapreview_label.pack(pady=10)
 
-display_canvas = tk.Canvas(right_frame, width=500, height=705, bg=background_color)
+display_canvas_width = 420
+display_canvas_height = display_canvas_width * 1.414  # A4 ratio
+
+display_canvas = tk.Canvas(right_frame, width=display_canvas_width, height=display_canvas_height, bg=background_color) #500x705 = A4Ratio
 display_canvas.pack(pady=10)
+
+orientation_button = tk.Button(right_frame, text="Toggle Orientation", command=toggle_orientation, bg=accent_color, fg="white", font=button_font, width=20)
+orientation_button.pack(pady=5)
 
 #Left Frame configuration
 title_label = tk.Label(left_frame, text="OCR Application", font=title_font, bg=background_color, fg=text_color)
@@ -206,7 +268,7 @@ browse_button.pack(pady=5)
 folder_label = tk.Label(left_frame, text="Selected File:", font=("Helvetica", 8), bg=background_color, fg=text_color)
 folder_label.pack(pady=5)
 
-file_type_label = tk.Label(left_frame, text="2. Select File Type (Image or PDF):", font=button_font, bg=background_color, fg=text_color)
+file_type_label = tk.Label(left_frame, text="2. Select File Type (Image or PDF), For PDF input selected pages below(default is page 1):", font=button_font, bg=background_color, fg=text_color)
 file_type_label.pack()
 
 file_type_var = tk.StringVar()
@@ -215,6 +277,10 @@ file_type_var.set("Image")
 file_type_menu = tk.OptionMenu(left_frame, file_type_var, "Image", "PDF")
 file_type_menu.config(bg=accent_color, fg="white", font=button_font)
 file_type_menu.pack(pady=5)
+
+page_number_entry = tk.Entry(left_frame, width=5, font=("Helvetica", 10), justify=tk.CENTER)
+page_number_entry.pack(pady=5)
+page_number_entry.insert(0, "1")  # Set default value to 1
 
 excel_name_label = tk.Label(left_frame, text="3. Select Excel file for saving result:", font=button_font, bg=background_color, fg=text_color)
 excel_name_label.pack()
@@ -256,6 +322,6 @@ file_type_menu.bind("<Configure>", lambda event: select_file_type())
 error_label = tk.Label(left_frame, text="", font=("Helvetica", 10), bg=background_color, fg="red")
 error_label.pack(pady=5)
 
-
 # Start the Tkinter event loop
 window.mainloop()
+
