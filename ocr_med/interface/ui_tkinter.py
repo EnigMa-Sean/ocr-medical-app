@@ -6,6 +6,7 @@ import threading
 import numpy as np
 import cv2
 import os
+import ctypes
 
 from ocr_med.roi_label import crop_with_tkinter as cwt
 from ocr_med.json_functions.file_functions import FileFunctions
@@ -32,7 +33,8 @@ def initiate_ocr():
 
 def label_function():
     image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
-    cropper = cwt.ImageCropper(image)
+    secondary_window = tk.Toplevel(window)
+    cropper = cwt.ImageCropper(secondary_window,image)
 
     # Add Jean label(or what ever u like to call) function here, and if want to change button name find this line
     cv2_thread =threading.Thread(target=cropper.crop_image)
@@ -105,7 +107,7 @@ def display_file(file_path, page_number):
         error_label.config(text="")
         show_success("File displayed successfully.")
     except Exception as e:
-        show_error(f"Error displaying file: {str(e)}, Forget to change File type?")
+        show_error(f"Error displaying file: {str(e)}")
 
 def convert_pdf_to_images(pdf_path):
     try:
@@ -214,7 +216,7 @@ window.title("OCR Application")
 window.geometry("960x540")  # Set the initial window size
 
 # Set DPI (dots per inch) to improve appearance
-window.tk.call('tk', 'scaling', 1.6)
+window.tk.call('tk', 'scaling', 2.4)
 
 # Define modern color scheme
 background_color = "#F5F5F5"
@@ -297,11 +299,11 @@ folder_label.grid(row=3, column=0, pady=5, sticky=tk.W)
 file_type_label = tk.Label(left_frame, text="2. Select File Type (Image or PDF):", font=label_font, bg=background_color, fg=text_color)
 file_type_label.grid(row=4, column=0, pady=10, sticky=tk.W)
 
-file_type_label = tk.Label(left_frame, text="For PDF input selected pages below (default is page 1):", font=label_font, bg=background_color, fg=text_color)
+file_type_label = tk.Label(left_frame, text="for PDF select pages below (default is page 1):", font=label_font, bg=background_color, fg=text_color)
 file_type_label.grid(row=4, column=1, pady=10, sticky=tk.W)
 
 file_type_var = tk.StringVar()
-file_type_var.set("Image")
+file_type_var.set("PDF")
 
 file_type_menu = tk.OptionMenu(left_frame, file_type_var, "Image", "PDF")
 file_type_menu.config(bg=accent_color, fg="white", font=button_font)
@@ -359,6 +361,8 @@ error_label = tk.Label(left_frame, text="Status Log: Nothing", font=label_font, 
 error_label.grid(row=14, column=0, columnspan=2, pady=5, sticky=tk.W)
 
 window.bind("<Configure>", on_configure)
+
+ctypes.windll.shcore.SetProcessDpiAwareness(True)
 
 # Start the Tkinter event loop
 window.mainloop()
