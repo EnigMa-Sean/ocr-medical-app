@@ -7,10 +7,8 @@ class ImageFilter:
 
     @staticmethod
     def convert_to_grayscale(image):
-        
-        img_array = np.array(image, dtype=np.uint8)
 
-        grayscale_image = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+        grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         return grayscale_image
     
@@ -38,17 +36,13 @@ class ImageFilter:
     @staticmethod
     def blurry_filter(image):
 
-        image = ImageFilter.convert_to_grayscale(image)
-
-        sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+        sharpen_kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
         filtered_img = cv2.filter2D(image, -1, sharpen_kernel)
 
         return filtered_img
     
     @staticmethod
     def shadow_filter(image):
-
-        image = ImageFilter.convert_to_grayscale(image)
 
         rgb_planes = cv2.split(image)
         result_norm_planes = []
@@ -65,29 +59,20 @@ class ImageFilter:
         return result_norm
     
     @staticmethod
-    def sharpen_filter(image):
-
-        image = ImageFilter.convert_to_grayscale(image)
-
-        if image is None:
-            sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-            filtered_img = cv2.filter2D(image, -1, sharpen_kernel)
-        else:
-            sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-            filtered_img = cv2.filter2D(image, -1, sharpen_kernel)
-
-        return filtered_img
-    
-    @staticmethod
     def noise_filter(image):
-
-        image = ImageFilter.convert_to_grayscale(image)
         
         kernel = np.ones((3, 3), np.uint8)
         eroded_image = cv2.erode(image, kernel)
         opened_image = cv2.dilate(kernel=kernel, src=eroded_image)
 
         return opened_image
+    
+    @staticmethod
+    def salt_and_pepper_filter(image):
+
+        median_blur = cv2.medianBlur(image, 3)
+
+        return median_blur
     
     @classmethod
     def rotation_filter(cls, image): # WIP not finished yet
