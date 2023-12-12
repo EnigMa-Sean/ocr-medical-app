@@ -11,6 +11,7 @@ from pathlib import Path
 import sys
 import threading
 from ocr_med.json_functions.file_functions import FileFunctions
+from ocr_med.filters.image_filters import ImageFilter
 import re
 
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
@@ -73,6 +74,7 @@ class ImageCropper:
         self.y_offset = 0
         
         self.file_functions = FileFunctions()
+        self.filter_functions = ImageFilter()
 
 
     def show_success(self, message):
@@ -217,11 +219,13 @@ class ImageCropper:
                 if len(self.roi_coordinates) == 2:
                     self.image_roi = image_copy[self.roi_coordinates[0][1]:self.roi_coordinates[1][1], 
                                         self.roi_coordinates[0][0]:self.roi_coordinates[1][0]]
-                    # self.image_roi = cv2.cvtColor(self.image_roi, cv2.COLOR_BGR2GRAY)
-                    # Filter needs to be used here with self.image_roi
-                    self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 4')
+                    self.image_roi = self.filter_functions.blurry_filter(self.image_roi)
+                    self.image_roi = self.filter_functions.salt_and_pepper_filter(self.image_roi)
+                    self.image_roi = self.filter_functions.convert_to_grayscale(self.image_roi)
+                    # cv2.imshow("ROI", self.image_roi)
+                    self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 6') # <---- OCR config needs to be 6 !!!!
                     self.ocr_text = re.sub(r'\n', '', self.ocr_text)
-                    # print(self.ocr_text)
+                    print(self.ocr_text)
                     self.callback_ocr()
             
             if key==27: # ESC

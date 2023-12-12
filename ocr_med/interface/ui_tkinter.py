@@ -196,20 +196,6 @@ def on_configure(event):
     window.grid_rowconfigure(0, weight=1)
     window.grid_columnconfigure(0, weight=1)
     main_frame.place(x=center_x, y=center_y, anchor="center")
-
-def on_configure(event):
-    # Adjust font and widget sizes when the window is resized
-    new_width = event.width
-    new_height = event.height
-
-    # Calculate the center position based on the new window dimensions
-    center_x = new_width // 2
-    center_y = new_height // 2
-
-    # Move the main frame to the center
-    window.grid_rowconfigure(0, weight=1)
-    window.grid_columnconfigure(0, weight=1)
-    main_frame.place(x=center_x, y=center_y, anchor="center")
     
 # Create the main window with higher DPI
 window = tk.Tk()
@@ -217,7 +203,7 @@ window.title("OCR Application")
 window.geometry("960x540")  # Set the initial window size
 
 # Set DPI (dots per inch) to improve appearance
-window.tk.call('tk', 'scaling', 2.4)
+window.tk.call('tk', 'scaling', 2.2)
 
 # Define modern color scheme
 background_color = "#F5F5F5"
