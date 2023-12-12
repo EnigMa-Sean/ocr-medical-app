@@ -3,9 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import imutils
 
-from base_class import BaseClass
+class ImageFilter:
 
-class ImageFilter(BaseClass):
+    @staticmethod
+    def convert_to_grayscale(image):
+        
+        img_array = np.array(image, dtype=np.uint8)
+
+        grayscale_image = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+
+        return grayscale_image
     
     @staticmethod
     def measure_quality(original_image, unrotated_image):
@@ -28,18 +35,22 @@ class ImageFilter(BaseClass):
         
         return unrotated_image
 
-    @classmethod
-    def blurry_filter(cls):
+    @staticmethod
+    def blurry_filter(image):
+
+        image = ImageFilter.convert_to_grayscale(image)
 
         sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-        filtered_img = cv2.filter2D(cls.image_for_processing, -1, sharpen_kernel)
+        filtered_img = cv2.filter2D(image, -1, sharpen_kernel)
 
         return filtered_img
     
-    @classmethod
-    def shadow_filter(cls):
+    @staticmethod
+    def shadow_filter(image):
 
-        rgb_planes = cv2.split(cls.image_for_processing)
+        image = ImageFilter.convert_to_grayscale(image)
+
+        rgb_planes = cv2.split(image)
         result_norm_planes = []
 
         for plane in rgb_planes:
@@ -53,35 +64,39 @@ class ImageFilter(BaseClass):
 
         return result_norm
     
-    @classmethod
-    def sharpen_filter(cls, image: None):
+    @staticmethod
+    def sharpen_filter(image):
+
+        image = ImageFilter.convert_to_grayscale(image)
 
         if image is None:
             sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-            filtered_img = cv2.filter2D(cls.image_for_processing, -1, sharpen_kernel)
+            filtered_img = cv2.filter2D(image, -1, sharpen_kernel)
         else:
             sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
             filtered_img = cv2.filter2D(image, -1, sharpen_kernel)
 
         return filtered_img
     
-    @classmethod
-    def noise_filter(cls):
+    @staticmethod
+    def noise_filter(image):
+
+        image = ImageFilter.convert_to_grayscale(image)
         
         kernel = np.ones((3, 3), np.uint8)
-        eroded_image = cv2.erode(cls.image_for_processing, kernel)
+        eroded_image = cv2.erode(image, kernel)
         opened_image = cv2.dilate(kernel=kernel, src=eroded_image)
 
         return opened_image
     
     @classmethod
-    def rotation_filter(cls): # WIP not finished yet
+    def rotation_filter(cls, image): # WIP not finished yet
         best_unrotated_image = None
         best_quality = 1.0
         
         for angle in range(-45, 46, 1):
-            unrotated_image = cls.unrotate_image(cls.image_for_processing, angle)
-            quality = cls.measure_quality(cls.image_for_processing, unrotated_image)
+            unrotated_image = cls.unrotate_image(image, angle)
+            quality = cls.measure_quality(image, unrotated_image)
             
             if quality > best_quality:
                 best_quality = quality
@@ -90,13 +105,15 @@ class ImageFilter(BaseClass):
         
         return best_unrotated_image
     
-    @classmethod
-    def wrinkle_filter(cls):
+    @staticmethod
+    def wrinkle_filter(image):
 
         kernel = np.ones((5, 5), np.uint8)
         kernel2 = np.ones((3, 3), np.uint8)
 
-        morph_image = cv2.morphologyEx(cls.image_for_processing, cv2.MORPH_CLOSE, kernel, iterations=3)
+        image = ImageFilter.convert_to_grayscale(image)
+
+        morph_image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=3)
     
         # Invert the image to enhance wrinkles
         inverted_image = cv2.bitwise_not(morph_image)
@@ -104,31 +121,11 @@ class ImageFilter(BaseClass):
         # Combine the inverted image with the original using a weighted average
         alpha = 0.5
         beta = 1.0 - alpha
-        unwrinkled_image = cv2.addWeighted(inverted_image, alpha, cls.image_for_processing, beta, 0.0)
+        unwrinkled_image = cv2.addWeighted(inverted_image, alpha, image, beta, 0.0)
         brighten_image = cv2.convertScaleAbs(unwrinkled_image, alpha=1.5, beta=30)
         filtered_image = cv2.erode(brighten_image, kernel2, iterations=1)
         
         return filtered_image
     
 if __name__ == '__main__':
-    path = '../noisy_images/wrinkled_image.jpg'
-    BaseClass(path)
-
-    filtered_img = ImageFilter.wrinkle_filter()
-    
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 5),
-                       sharex=True, sharey=True)
-
-    plt.gray()
-
-    ax[0].imshow(BaseClass.image_for_processing, vmin=filtered_img.min(), vmax=filtered_img.max())
-    ax[0].axis('off')
-    ax[0].set_title('Data')
-
-    ax[1].imshow(filtered_img)
-    ax[1].axis('off')
-    ax[1].set_title('Self tuned restoration')
-
-    fig.tight_layout()
-
-    plt.show()
+    pass
