@@ -23,6 +23,9 @@ class FileFunctions:
         self.base_dict[f'region_{region_number}'] = {'title': None, 'key_values': {}}
         self.latest_region = f'region_{region_number}'
 
+    def add_template_name(self, template_name: str):
+        self.base_dict['template_name'] = template_name
+
     def add_title(self, title):
         self.base_dict[self.latest_region]['title'] = title
 

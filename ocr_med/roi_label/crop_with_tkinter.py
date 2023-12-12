@@ -16,11 +16,11 @@ import re
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
 
 class ImageCropper:
-    def __init__(self, image):
+    def __init__(self,parent, image):
+        self.tkInter = parent
         self.image = image
         self.new_image = image
 
-        self.tkInter = tk.Tk()
         self.tkInter.title("Label interface")
         self.tkInter.geometry("450x150") 
         self.style = ttk.Style()
@@ -37,6 +37,7 @@ class ImageCropper:
         self.get_value_ocr = False
         self.exitFlag = False
         self.previous_value_exist = True
+        self.title_exist = False
         self.buttonState = None
         
         # Text box and enter button
@@ -135,9 +136,6 @@ class ImageCropper:
     def get_roi_coordinate(self):
         return self.roi_coordinates
     
-    def reset_input_text(self):
-        self.input_text = StringVar()
-    
     def reset_get_value_text_flag(self):
         self.get_value_text = False
 
@@ -220,6 +218,7 @@ class ImageCropper:
                     self.image_roi = image_copy[self.roi_coordinates[0][1]:self.roi_coordinates[1][1], 
                                         self.roi_coordinates[0][0]:self.roi_coordinates[1][0]]
                     # self.image_roi = cv2.cvtColor(self.image_roi, cv2.COLOR_BGR2GRAY)
+                    # Filter needs to be used here with self.image_roi
                     self.ocr_text = pytesseract.image_to_string(self.image_roi, lang='eng', config='--psm 4')
                     self.ocr_text = re.sub(r'\n', '', self.ocr_text)
                     # print(self.ocr_text)
@@ -239,25 +238,32 @@ class ImageCropper:
             try:
                 if self.get_value_text_flag:
                     if self.get_button_state == 1:
-                        self.file_functions.base_dict['template_name'] = self.get_input_text.get()
+                        self.file_functions.add_template_name(self.get_input_text.get())
                         self.show_success("Add template name by typing")
+                        print(self.file_functions.base_dict)
                     elif self.get_button_state == 2:
-                        self.file_functions.add_region()
-                        self.file_functions.add_title(self.get_input_text.get())
-                        self.show_success("Successfully add title by typing")
+                        if not self.previous_value_exist:
+                            self.show_error("Please add a value in previous key first")
+                            print(self.file_functions.base_dict)
+                        else: 
+                            self.title_exist = True         # First Time only
+                            self.file_functions.add_region()
+                            self.file_functions.add_title(self.get_input_text.get())
+                            print(self.file_functions.base_dict)
+                            self.show_success("Successfully add title by typing")
+                           
                     elif self.get_button_state == 3:
-                        if self.file_functions.base_dict[self.file_functions.latest_region]['title'] == None:
+                        if not self.title_exist:
                             self.show_error("Please add a title before adding a header")
                             print(self.file_functions.base_dict)
-                        if not self.previous_value_exist:
-                            self.show_error("Please add a value in previous key before adding a new key")
+                        elif not self.previous_value_exist:
+                            self.show_error("Please add a value in previous key first")
                             print(self.file_functions.base_dict)
                         else: 
                             self.previous_value_exist = False
                             self.file_functions.add_key(self.get_input_text.get())
                             self.show_success("Successfully add key by typing")
                             print(self.file_functions.base_dict)
-                            
                     elif self.get_button_state == 4:
                         self.show_error("Please crop from the image to get the value")
                     else:   
@@ -268,26 +274,31 @@ class ImageCropper:
                 elif self.get_value_ocr_flag:
                     if self.get_button_state == 1:
                         self.show_error("Please identify template name by typing")
+                        print(self.file_functions.base_dict)
                     elif self.get_button_state == 2:
                         self.show_error("Please identify title name by typing")
+                        print(self.file_functions.base_dict)
                     elif self.get_button_state == 3:
-                        if self.file_functions.base_dict[self.file_functions.latest_region]['title'] == None:
+                        if not self.title_exist:
                             self.show_error("Please add a title before adding a header")
                             print(self.file_functions.base_dict)
-                        if not self.previous_value_exist:
-                            self.show_error("Please add a value in previous key before adding a new key")
+                        elif not self.previous_value_exist:
+                            self.show_error("Please add a value in previous key first")
                             print(self.file_functions.base_dict)
                         else:
                             self.previous_value_exist = False
                             self.file_functions.add_key(self.get_ocr_text)
                             self.show_success("Successfully add key by OCR croping")
+                            print(self.file_functions.base_dict)
                     elif self.get_button_state == 4:
-                        if self.file_functions.base_dict[self.file_functions.latest_region]['title'] == None:
-                            self.show_error("Please add a title before adding a header")
+                        if self.previous_value_exist:
+                            self.show_error("Please add a new key first")
+                            print(self.file_functions.base_dict)
                         else:
                             self.previous_value_exist = True
                             self.file_functions.add_value(self.get_roi_coordinate)
                             self.show_success("Successfully add value by OCR croping")
+                            print(self.file_functions.base_dict)
                     else: 
                         self.show_error("Please select a mode")
                     self.reset_get_value_ocr_flag()
@@ -311,7 +322,7 @@ if __name__ == "__main__":
     image = input_img 
 
     label_functions = ImageCropper(image)
-    file_functions = FileFunctions()
+    #file_functions = FileFunctions()
 
     cv2_thread =threading.Thread(target=label_functions.crop_image)
     cv2_thread.start()
