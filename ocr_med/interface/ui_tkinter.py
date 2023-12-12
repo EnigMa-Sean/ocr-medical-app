@@ -207,7 +207,7 @@ window.tk.call('tk', 'scaling', 2.2)
 
 # Define modern color scheme
 background_color = "#F5F5F5"
-accent_color = "#3498db"
+accent_color = "#006401"
 text_color = "#2c3e50"
 
 # Configure window background color
@@ -249,7 +249,7 @@ style.configure("right.TFrame", background=background_color)
 
 # Create and pack widgets with modern styling for the left frame
 title_font = ("Helvetica", 16, "bold")
-button_font = ("Helvetica", 12)
+button_font = ("Helvetica", 10)
 label_font = ("Helvetica", 12)
 
 # Right Frame Configuration
@@ -277,10 +277,10 @@ folder_path_entry = tk.Entry(left_frame, width=30, font=label_font)
 folder_path_entry.grid(row=2, column=0, pady=5, sticky=tk.W)
 
 browse_button = tk.Button(left_frame, text="Browse", command=browse_folder_path, bg=accent_color, fg="white", font=button_font)
-browse_button.grid(row=2, column=1, pady=5, sticky=tk.W)
+browse_button.grid(row=3, column=0, pady=5, sticky=tk.W)
 
 folder_label = tk.Label(left_frame, text="Selected File:", font=label_font, bg=background_color, fg=text_color)
-folder_label.grid(row=3, column=0, pady=5, sticky=tk.W)
+folder_label.grid(row=2, column=1, pady=5, sticky=tk.W)
 
 # Row 4
 file_type_label = tk.Label(left_frame, text="2. Select File Type (Image or PDF):", font=label_font, bg=background_color, fg=text_color)
@@ -306,33 +306,35 @@ excel_name_label = tk.Label(left_frame, text="3. Select Folder for Saving Result
 excel_name_label.grid(row=6, column=0, pady=10, sticky=tk.W)
 
 excel_name_entry = tk.Entry(left_frame, width=30, font=label_font)
+excel_name_entry.insert(0, "your_default_value_here")  # for sean default change here
 excel_name_entry.grid(row=7, column=0, pady=5, sticky=tk.W)
 
 browse_excel_button = tk.Button(left_frame, text="Browse", command=browse_excel_path, bg=accent_color, fg="white", font=button_font)
-browse_excel_button.grid(row=7, column=1, pady=5, sticky=tk.W)
+browse_excel_button.grid(row=8, column=0, pady=5, sticky=tk.W)
 
 excel_label = tk.Label(left_frame, text="Selected Folder:", font=label_font, bg=background_color, fg=text_color)
-excel_label.grid(row=8, column=0, pady=5, sticky=tk.W)
+excel_label.grid(row=7, column=1, pady=5, sticky=tk.W)
 
 # Row 9
-template_label = tk.Label(left_frame, text="4. Select Template or Create New Template", font=label_font, bg=background_color, fg=text_color)
+template_label = tk.Label(left_frame, text="4. Select Template or Create Template", font=label_font, bg=background_color, fg=text_color)
 template_label.grid(row=9, column=0, pady=10, sticky=tk.W)
 
 template_path_entry = tk.Entry(left_frame, width=30, font=label_font)
+template_path_entry.insert(0, "your_default_value_here")  # for sean default change here
 template_path_entry.grid(row=10, column=0, pady=5, sticky=tk.W)
 
 browse_template_button = tk.Button(left_frame, text="Browse Existed Template", command=lambda: browse_template_path(template_path_entry), bg=accent_color, fg="white", font=button_font)
-browse_template_button.grid(row=10, column=1, pady=5, sticky=tk.W)
+browse_template_button.grid(row=11, column=0, pady=5, sticky=tk.W)
 
 template_location_label = tk.Label(left_frame, text="Selected Template:", font=label_font, bg=background_color, fg=text_color)
-template_location_label.grid(row=11, column=0, pady=5, sticky=tk.W)
+template_location_label.grid(row=10, column=1, pady=5, sticky=tk.W)
 
-create_template_button = tk.Button(left_frame, text="Create New Template", command=label_function, bg=accent_color, fg="white", font=button_font)
+create_template_button = tk.Button(left_frame, text="Click here to create New Template", command=label_function, bg=accent_color, fg="white", font=button_font)
 create_template_button.grid(row=11, column=1, pady=5, sticky=tk.W)
 
 # Row 11
 # Menu Label
-menu_label = tk.Label(left_frame, text="Menu", font=button_font, bg=background_color, fg=text_color)
+menu_label = tk.Label(left_frame, text="Menu", font=("Helvetica", 12, "bold"), bg=background_color, fg=text_color)
 menu_label.grid(row=12, column=0, pady=10, sticky=tk.W)
 
 # Row 12
