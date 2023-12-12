@@ -31,22 +31,7 @@ def initiate_ocr():
 
 
 def label_function():
-    folder_path = folder_path_entry.get()   #return type of file_path is string
-    output_path = excel_name_entry.get()    #return type of output_path is string
-    file_type_var = select_file_type()      #return type of file_type_var is string ("Image" or "PDF")
-    # For multiple pages pdf
-    page_number = page_number_entry.get()
-
-    if file_type_var == "Image":
-        # For image files
-        image = cv2.imread(folder_path)
-    elif file_type_var == "PDF":
-        # For PDF files
-        pdf_images = convert_pdf_to_images(folder_path)
-        page_index = int(page_number) - 1  # Convert to zero-based index
-        if 0 <= page_index < len(pdf_images):
-            image = np.array(pdf_images[page_index])
-    
+    image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
     cropper = cwt.ImageCropper(image)
 
     # Add Jean label(or what ever u like to call) function here, and if want to change button name find this line
@@ -56,8 +41,6 @@ def label_function():
     main_thread.start()
 
     cropper.tkInter.mainloop()
-    # label_button = tk.Button(left_frame, text="Start Label", command=label_function, bg=accent_color, fg="white", font=button_font, width=20)
-    # and change text="Start Label" to text="What ever u like to call"
 
 #This is the function for browse button in create template window 
 def browse_template_path(template_entry):
@@ -122,14 +105,14 @@ def display_file(file_path, page_number):
         error_label.config(text="")
         show_success("File displayed successfully.")
     except Exception as e:
-        show_error(f"Error displaying file: {str(e)}")
+        show_error(f"Error displaying file: {str(e)}, Forget to change File type?")
 
 def convert_pdf_to_images(pdf_path):
     try:
         pdf_images = convert_from_path(pdf_path)
         return pdf_images
     except Exception as e:
-        show_error(f"Error converting PDF to images: {str(e)}")
+        show_error(f"Error converting PDF to images: {str(e)}, Forget to change File type?")
         return None
 
 def show_success(message):
