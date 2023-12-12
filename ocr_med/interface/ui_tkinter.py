@@ -32,13 +32,15 @@ def initiate_ocr():
 
 def label_function():
     image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
-    cropper = cwt.ImageCropper(image)
+    second_window = tk.Toplevel(window)
+    cropper = cwt.ImageCropper(second_window, image)
 
     # Add Jean label(or what ever u like to call) function here, and if want to change button name find this line
     cv2_thread =threading.Thread(target=cropper.crop_image)
     cv2_thread.start()
     main_thread = threading.Thread(target=cropper.main)
     main_thread.start()
+    
 
     cropper.tkInter.mainloop()
 
