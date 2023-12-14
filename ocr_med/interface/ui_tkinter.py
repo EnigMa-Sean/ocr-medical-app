@@ -196,6 +196,12 @@ def on_configure(event):
     window.grid_rowconfigure(0, weight=1)
     window.grid_columnconfigure(0, weight=1)
     main_frame.place(x=center_x, y=center_y, anchor="center")
+
+def resize_window():
+    window.update_idletasks()
+    width = window.winfo_reqwidth()
+    height = window.winfo_reqheight()
+    window.geometry(f"{width}x{height}")
     
 # Create the main window with higher DPI
 window = tk.Tk()
@@ -351,5 +357,6 @@ error_label.grid(row=14, column=0, columnspan=2, pady=5, sticky=tk.W)
 
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
 
+resize_window()
 # Start the Tkinter event loop
 window.mainloop()

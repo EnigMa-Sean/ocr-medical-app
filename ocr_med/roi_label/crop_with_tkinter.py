@@ -23,7 +23,7 @@ class ImageCropper:
         self.new_image = image
 
         self.tkInter.title("Label interface")
-        self.tkInter.geometry("450x150") 
+        self.tkInter.geometry("575x250") 
         self.style = ttk.Style()
         
         self.input_text = StringVar() 
@@ -75,7 +75,12 @@ class ImageCropper:
         
         self.file_functions = FileFunctions()
         self.filter_functions = ImageFilter()
-
+    
+    def resize_window(self):
+        self.tkInter.update_idletasks()
+        width = self.tkInter.winfo_reqwidth()
+        height = self.tkInter.winfo_reqheight()
+        self.tkInter.geometry(f"{width}x{height}")
 
     def show_success(self, message):
         self.status_label.config(text=message, fg="green")
@@ -333,6 +338,7 @@ if __name__ == "__main__":
     main_thread = threading.Thread(target=label_functions.main)
     main_thread.start()
 
+    label_functions.resize_window()
     label_functions.tkInter.mainloop()
     
     
