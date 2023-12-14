@@ -1,1 +1,0 @@
-{"template_name": "ForYun", "image_file_name": null, "region_1": {"title": "patient-information", "key_values": {"Name": "Yun", "Age": "1001", "date-of-birth": "01/01/1899", "favorite-game": "baldurs gate 2", "favorite-food": "noodles"}}, "region_2": {"title": "clinical_data", "key_values": {"height": "200", "weight": "65", "blood-pressure": "200/30", "heart-rate": "500"}}}

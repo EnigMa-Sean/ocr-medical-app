@@ -75,7 +75,7 @@ class FileFunctions:
             dict_items[f'region_{region_num+1}'] = data[f'region_{region_num+1}']['key_values'].items()
 
         csv_file = os.path.join(csv_file_path, f'{dict_result.get("template_name")}.csv')
-        with open(csv_file, 'w', newline='') as csv_file:
+        with open(csv_file, 'w', newline='', encoding='utf-8') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=['region_title', 'topic', 'value'])
             writer.writeheader()
 

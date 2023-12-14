@@ -28,7 +28,7 @@ def run_ocr(image, template_name, file_name):
             image_roi = filter_functions.blurry_filter(image_roi)
             image_roi = filter_functions.salt_and_pepper_filter(image_roi)
             image_roi = filter_functions.convert_to_grayscale(image_roi)
-            result = pytesseract.image_to_string(image_roi, lang='eng', config='--psm 4')
+            result = pytesseract.image_to_string(image_roi, lang='eng', config='--psm 6')
             result = re.sub(r'\n', '', result)
             template_dict[region]['key_values'][list_keys[roi_index]] = result 
     template_dict['image_file_name'] = file_name
