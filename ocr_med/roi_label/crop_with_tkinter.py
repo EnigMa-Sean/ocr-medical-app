@@ -20,8 +20,6 @@ class ImageCropper:
         self.tkInter = parent
         self.image = image
         self.new_image = image
-        # self.image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # self.new_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         self.tkInter.title("Label interface")
         self.tkInter.geometry("575x200") 
@@ -307,7 +305,7 @@ class ImageCropper:
                         else:
                             self.previous_value_exist = True
                             self.file_functions.add_value(self.get_roi_coordinate)
-                            self.show_success("Successfully add value by OCR croping")
+                            self.show_success("Successfully add value by OCR cropping")
                             print(self.file_functions.base_dict)
                     else: 
                         self.show_error("Please select a mode")

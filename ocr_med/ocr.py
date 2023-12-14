@@ -6,6 +6,10 @@ import cv2
 import re
 from ocr_med.filters.image_filters import ImageFilter
 
+# Use the following line if you are using Docker
+# TESSERACT_PATH = os.environ.get("TESSERACT_PATH")
+# pytesseract.pytesseract.tesseract_cmd = r'TESSERACT_PATH'
+
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
 ROOT_PATH :str = Path(__file__).parents[1]
 
