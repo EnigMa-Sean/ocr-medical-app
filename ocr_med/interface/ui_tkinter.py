@@ -316,7 +316,7 @@ excel_name_label = tk.Label(left_frame, text="3. Select Folder for Saving Result
 excel_name_label.grid(row=6, column=0, pady=10, sticky=tk.W)
 
 excel_name_entry = tk.Entry(left_frame, width=30, font=label_font)
-excel_name_entry.insert(0, "your_default_value_here")  # for sean default change here
+excel_name_entry.insert(0, "choose_a_path")  # for sean default change here
 excel_name_entry.grid(row=7, column=0, pady=5, sticky=tk.W)
 
 browse_excel_button = tk.Button(left_frame, text="Browse", command=browse_excel_path, bg=accent_color, fg="white", font=button_font)
@@ -330,7 +330,7 @@ template_label = tk.Label(left_frame, text="4. Select Template or Create Templat
 template_label.grid(row=9, column=0, pady=10, sticky=tk.W)
 
 template_path_entry = tk.Entry(left_frame, width=30, font=label_font)
-template_path_entry.insert(0, "your_default_value_here")  # for sean default change here
+template_path_entry.insert(0, "choose_a_path")  # for sean default change here
 template_path_entry.grid(row=10, column=0, pady=5, sticky=tk.W)
 
 browse_template_button = tk.Button(left_frame, text="Browse Existed Template", command=lambda: browse_template_path(template_path_entry), bg=accent_color, fg="white", font=button_font)

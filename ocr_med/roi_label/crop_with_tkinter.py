@@ -14,22 +14,14 @@ from ocr_med.json_functions.file_functions import FileFunctions
 from ocr_med.filters.image_filters import ImageFilter
 import re
 
-relative_path = 'tesseract.exe'
-try:
-    # PyInstaller creates a temp folder and stores path in _MEIPASS
-    base_path = sys._MEIPASS
-except AttributeError:
-    base_path = os.path.abspath(".")
-
-path = os.path.join(base_path, relative_path).replace('\\', '/')
-print(path)
-pytesseract.pytesseract.tesseract_cmd = path
-
+pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe' 
 class ImageCropper:
     def __init__(self, parent, image):
         self.tkInter = parent
-        self.image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        self.new_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        self.image = image
+        self.new_image = image
+        # self.image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # self.new_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         self.tkInter.title("Label interface")
         self.tkInter.geometry("575x200") 
