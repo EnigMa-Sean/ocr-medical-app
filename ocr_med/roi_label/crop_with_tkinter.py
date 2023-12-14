@@ -28,11 +28,11 @@ pytesseract.pytesseract.tesseract_cmd = path
 class ImageCropper:
     def __init__(self, parent, image):
         self.tkInter = parent
-        self.image = image
-        self.new_image = image
+        self.image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        self.new_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         self.tkInter.title("Label interface")
-        self.tkInter.geometry("575x250") 
+        self.tkInter.geometry("575x200") 
         self.style = ttk.Style()
         
         self.input_text = StringVar() 
