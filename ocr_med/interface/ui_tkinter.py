@@ -15,21 +15,21 @@ from ocr_med.ocr import run_ocr
 def initiate_ocr():
     image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
     file_name = os.path.split(folder_path)[-1]
+    
     # Check if the folder path and Excel name are provided
     if not folder_path or not output_path:
         show_error("Please enter both folder path and Excel file name.")
     else:
         try:
             # Add Yun OCR Code here
+            result_ocr = run_ocr(image, template_path, file_name)
+            FileFunctions.export_json_csv(result_ocr, output_path)
             #print(f"OCR initiated for Folder: {folder_path}, Excel File: {excel_name}")
             success_message = f"OCR is finished and saved at {output_path}" # Replace output_path with the actual path
             show_success(success_message)
 
         except Exception as e:
             show_error(f"Error during OCR process: {str(e)}")
-    result_ocr = run_ocr(image, template_path, file_name)
-    FileFunctions.export_json_csv(result_ocr, output_path)
-
 
 def label_function():
     image, folder_path, output_path, template_path, file_type_var, page_number = call_all_value_and_change_to_image()
@@ -42,7 +42,7 @@ def label_function():
     main_thread = threading.Thread(target=cropper.main)
     main_thread.start()
     
-
+    cropper.resize_window()
     cropper.tkInter.mainloop()
 
 #This is the function for browse button in create template window 
@@ -111,12 +111,16 @@ def display_file(file_path, page_number):
         show_error(f"Error displaying file: {str(e)}")
 
 def convert_pdf_to_images(pdf_path):
-    try:
-        pdf_images = convert_from_path(pdf_path)
-        return pdf_images
-    except Exception as e:
-        show_error(f"Error converting PDF to images: {str(e)}, Forget to change File type?")
-        return None
+    if not pdf_path:
+        show_error("Please choose a file first.")
+        return  None
+    else:
+        try:
+            pdf_images = convert_from_path(pdf_path)
+            return pdf_images
+        except Exception as e:
+            show_error(f"Error converting PDF to images: {str(e)}, Forget to change File type?")
+            return None
 
 def show_success(message):
     error_label.config(text=message, fg="green", font=("Helvetica", 9))
