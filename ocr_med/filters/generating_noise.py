@@ -1,12 +1,7 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 import random
 import imutils
-
-# import math
-# from PIL import Image
-#import skimage.exposure
 
 class GeneratingNoise:
 

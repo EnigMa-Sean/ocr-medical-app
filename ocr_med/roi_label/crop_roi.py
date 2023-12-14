@@ -5,9 +5,21 @@ from pdf2image import convert_from_path
 import pytesseract
 from ocr_med.json_functions.file_functions import FileFunctions
 import re
+import sys
 
 ROOT_PATH :str = Path(__file__).parents[2]
-pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'       
+
+relative_path = 'tesseract.exe'
+try:
+    # PyInstaller creates a temp folder and stores path in _MEIPASS
+    base_path = sys._MEIPASS
+except AttributeError:
+    base_path = os.path.abspath(".")
+
+path = os.path.join(base_path, relative_path).replace('\\', '/')
+print(path)
+pytesseract.pytesseract.tesseract_cmd = path
+# pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'       
 
 class CropROI:
     def __init__(self):

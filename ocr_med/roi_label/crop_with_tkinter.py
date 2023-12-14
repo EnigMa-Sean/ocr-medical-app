@@ -14,7 +14,16 @@ from ocr_med.json_functions.file_functions import FileFunctions
 from ocr_med.filters.image_filters import ImageFilter
 import re
 
-pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
+relative_path = 'tesseract.exe'
+try:
+    # PyInstaller creates a temp folder and stores path in _MEIPASS
+    base_path = sys._MEIPASS
+except AttributeError:
+    base_path = os.path.abspath(".")
+
+path = os.path.join(base_path, relative_path).replace('\\', '/')
+print(path)
+pytesseract.pytesseract.tesseract_cmd = path
 
 class ImageCropper:
     def __init__(self, parent, image):
@@ -297,7 +306,7 @@ class ImageCropper:
                         else:
                             self.previous_value_exist = False
                             self.file_functions.add_key(self.get_ocr_text)
-                            self.show_success("Successfully add key by OCR croping")
+                            self.show_success("Successfully add key by OCR cropping")
                             print(self.file_functions.base_dict)
                     elif self.get_button_state == 4:
                         if self.previous_value_exist:
