@@ -73,8 +73,9 @@ class FileFunctions:
 
         for region_num in range(number_of_regions):
             dict_items[f'region_{region_num+1}'] = data[f'region_{region_num+1}']['key_values'].items()
-
-        csv_file = os.path.join(csv_file_path, f'{dict_result.get("template_name")}.csv')
+            
+        file_name = os.path.splitext(dict_result.get("image_file_name"))[0]
+        csv_file = os.path.join(csv_file_path, f'{file_name}.csv')
         with open(csv_file, 'w', newline='', encoding='utf-8') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=['region_title', 'topic', 'value'])
             writer.writeheader()
