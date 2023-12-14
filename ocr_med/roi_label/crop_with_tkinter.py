@@ -17,7 +17,7 @@ import re
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract/tesseract.exe'
 
 class ImageCropper:
-    def __init__(self,parent, image):
+    def __init__(self, parent, image):
         self.tkInter = parent
         self.image = image
         self.new_image = image

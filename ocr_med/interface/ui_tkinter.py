@@ -349,8 +349,6 @@ initiate_ocr_button.grid(row=13, column=1, pady=5, sticky=tk.W)
 error_label = tk.Label(left_frame, text="Create by Biomedical Engineering, Mahidol University", font=label_font, bg=background_color, fg=text_color)
 error_label.grid(row=14, column=0, columnspan=2, pady=5, sticky=tk.W)
 
-#window.bind("<Configure>", on_configure)
-
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
 
 # Start the Tkinter event loop
